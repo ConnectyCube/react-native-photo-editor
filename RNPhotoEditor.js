@@ -18,22 +18,14 @@ const defaultColors = [
     '#ff00ff'
 ]
 
-type Props = {
-    colors?: Array<string>,
-    hiddenControls?: Array<string>,
-    onCancel?: any => void,
-    onDone?: any => void,
-    path: string,
-    stickers?: Array<string>
-}
-
-export default function PhotoEditor(props: Props) {
+export default function PhotoEditor(props) {
     const {
         colors = defaultColors,
+        editedImageDirectory = null,
         hiddenControls = [],
         onCancel = () => {},
         onDone = () => {},
-        path,
+        path = null,
         stickers = []
     } = props
     RNPhotoEditor.Edit(
@@ -41,6 +33,7 @@ export default function PhotoEditor(props: Props) {
             colors,
             hiddenControls,
             onCancel,
+            editedImageDirectory,
             onDone,
             path,
             stickers
