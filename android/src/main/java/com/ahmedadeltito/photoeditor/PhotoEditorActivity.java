@@ -7,8 +7,8 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -20,17 +20,6 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import androidx.annotation.NonNull;
-import androidx.exifinterface.media.ExifInterface;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.core.content.PermissionChecker;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -43,6 +32,18 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.PermissionChecker;
+import androidx.exifinterface.media.ExifInterface;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import com.ahmedadeltito.photoeditor.widget.SlidingUpPanelLayout;
 import com.ahmedadeltito.photoeditorsdk.BrushDrawingView;
@@ -62,7 +63,6 @@ import java.util.Date;
 import java.util.List;
 
 import ui.photoeditor.R;
-
 public class PhotoEditorActivity extends AppCompatActivity implements View.OnClickListener, OnPhotoEditorSDKListener {
 
     public static Typeface emojiFont = null;
@@ -82,36 +82,42 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private ArrayList<Integer> colorPickerColors;
     private int colorCodeTextView = -1;
     private PhotoEditorSDK photoEditorSDK;
-    private String selectedImagePath;
     private int imageOrientation;
+    private ImageView backgroundImageView;
+    private Bitmap backgroundBitMap;
+    private int currentBackgroundColor = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_editor);
 
-        selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
-        if (selectedImagePath.contains("content://")) {
-            selectedImagePath = getPath(Uri.parse(selectedImagePath));
-        }
-        Log.d("PhotoEditorSDK", "Selected image path: " + selectedImagePath);
+        String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
-        Bitmap bitmap = BitmapFactory.decodeFile(selectedImagePath, options);
 
-        Bitmap rotatedBitmap;
-        try {
-            ExifInterface exif = new ExifInterface(selectedImagePath);
-            imageOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-            rotatedBitmap = rotateBitmap(bitmap, imageOrientation, false);
-        } catch (IOException e) {
-            rotatedBitmap = bitmap;
+        if (selectedImagePath == null){
+            backgroundBitMap = Bitmap.createBitmap(DeviceUtils.getDeviceWidth(this), DeviceUtils.getDeviceHeight(this), Bitmap.Config.RGB_565);
+            currentBackgroundColor = getResources().getColor(R.color.white);
             imageOrientation = ExifInterface.ORIENTATION_NORMAL;
+            backgroundBitMap.eraseColor(currentBackgroundColor);
+        } else {
+            if (selectedImagePath.contains("content://")) {
+                selectedImagePath = getPath(Uri.parse(selectedImagePath));
+            }
 
-            e.printStackTrace();
+            backgroundBitMap = BitmapFactory.decodeFile(selectedImagePath, options);
+
+            try {
+                ExifInterface exif = new ExifInterface(selectedImagePath);
+                imageOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                backgroundBitMap = rotateBitmap(backgroundBitMap, imageOrientation, false);
+            } catch (IOException e) {
+                imageOrientation = ExifInterface.ORIENTATION_NORMAL;
+                e.printStackTrace();
+            }
         }
-
 
         Typeface newFont = getFontFromRes(R.raw.eventtusicons);
         emojiFont = getFontFromRes(R.raw.emojioneandroid);
@@ -124,6 +130,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         TextView addPencil = (TextView) findViewById(R.id.add_pencil_tv);
         RelativeLayout deleteRelativeLayout = (RelativeLayout) findViewById(R.id.delete_rl);
         TextView deleteTextView = (TextView) findViewById(R.id.delete_tv);
+        ImageView changeBackgroundBtn = (ImageView) findViewById(R.id.change_background_btn);
         TextView addImageEmojiTextView = (TextView) findViewById(R.id.add_image_emoji_tv);
         TextView saveTextView = (TextView) findViewById(R.id.save_tv);
         TextView saveTextTextView = (TextView) findViewById(R.id.save_text_tv);
@@ -134,7 +141,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         TextView clearAllTextView = (TextView) findViewById(R.id.clear_all_tv);
         TextView clearAllTextTextView = (TextView) findViewById(R.id.clear_all_text_tv);
         TextView goToNextTextView = (TextView) findViewById(R.id.go_to_next_screen_tv);
-        ImageView photoEditImageView = (ImageView) findViewById(R.id.photo_edit_iv);
+        backgroundImageView = (ImageView) findViewById(R.id.photo_edit_iv);
         mLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         topShadow = findViewById(R.id.top_shadow);
         topShadowRelativeLayout = (RelativeLayout) findViewById(R.id.top_parent_rl);
@@ -144,11 +151,13 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         ViewPager pager = (ViewPager) findViewById(R.id.image_emoji_view_pager);
         PageIndicator indicator = (PageIndicator) findViewById(R.id.image_emoji_indicator);
 
-        photoEditImageView.setImageBitmap(rotatedBitmap);
+        backgroundImageView.setImageBitmap(backgroundBitMap);
 
         closeTextView.setTypeface(newFont);
         addTextView.setTypeface(newFont);
         addPencil.setTypeface(newFont);
+//        changeBackgroundBtn.setTypeface(newFont);
+        changeBackgroundBtn.setVisibility(currentBackgroundColor == 0 ? View.GONE : View.VISIBLE);
         addImageEmojiTextView.setTypeface(newFont);
         saveTextView.setTypeface(newFont);
         undoTextView.setTypeface(newFont);
@@ -179,7 +188,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
         photoEditorSDK = new PhotoEditorSDK.PhotoEditorSDKBuilder(PhotoEditorActivity.this)
                 .parentView(parentImageRelativeLayout) // add parent image view
-                .childView(photoEditImageView) // add the desired image view
+                .childView(backgroundImageView) // add the desired image view
                 .deleteView(deleteRelativeLayout) // add the deleted view that will appear during the movement of the views
                 .brushDrawingView(brushDrawingView) // add the brush drawing view that is responsible for drawing on the image view
                 .buildPhotoEditorSDK(); // build photo editor sdk
@@ -208,6 +217,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
         closeTextView.setOnClickListener(this);
         addImageEmojiTextView.setOnClickListener(this);
+        changeBackgroundBtn.setOnClickListener(this);
         addTextView.setOnClickListener(this);
         addPencil.setOnClickListener(this);
         saveTextView.setOnClickListener(this);
@@ -305,6 +315,11 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         photoEditorSDK.addText(text, colorCodeTextView);
     }
 
+    private void changeBackgroundColor(int colorCode) {
+        backgroundBitMap.eraseColor(colorCode);
+        backgroundImageView.setImageBitmap(backgroundBitMap);
+    }
+
     private void clearAllViews() {
         photoEditorSDK.clearAllViews();
     }
@@ -356,6 +371,51 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 pop.dismiss();
+            }
+        });
+    }
+
+    private void openChangeBackgroundColorPopupWindow() {
+        final int[] tempColor = new int[1];
+        tempColor[0] = currentBackgroundColor;
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View changeBackgroundPopupWindowRootView = inflater.inflate(R.layout.change_background_color_popup_window, null);
+        final TextView changeBackgroundTextView = changeBackgroundPopupWindowRootView.findViewById(R.id.change_bg_done_tv);
+        RecyclerView addTextColorPickerRecyclerView = changeBackgroundPopupWindowRootView.findViewById(R.id.change_bg_color_picker_recycler_view);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(PhotoEditorActivity.this, LinearLayoutManager.HORIZONTAL, false);
+        addTextColorPickerRecyclerView.setLayoutManager(layoutManager);
+        addTextColorPickerRecyclerView.setHasFixedSize(true);
+        final ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(PhotoEditorActivity.this, colorPickerColors);
+        colorPickerAdapter.setOnColorPickerClickListener(new ColorPickerAdapter.OnColorPickerClickListener() {
+            @Override
+            public void onColorPickerClickListener(int colorCode) {
+                tempColor[0] = colorCode;
+                changeBackgroundColor(colorCode);
+            }
+        });
+        addTextColorPickerRecyclerView.setAdapter(colorPickerAdapter);
+
+        final PopupWindow pop = new PopupWindow(PhotoEditorActivity.this);
+        pop.setContentView(changeBackgroundPopupWindowRootView);
+        pop.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
+        pop.setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
+        pop.setFocusable(true);
+        pop.setBackgroundDrawable(null);
+        pop.showAtLocation(changeBackgroundPopupWindowRootView, Gravity.TOP, 0, 0);
+        updateView(View.GONE);
+
+        changeBackgroundTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                currentBackgroundColor = tempColor[0];
+                pop.dismiss();
+            }
+        });
+        pop.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                changeBackgroundColor(currentBackgroundColor);
+                updateView(View.VISIBLE);
             }
         });
     }
@@ -414,7 +474,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                     Intent returnIntent = new Intent();
 
                     if (isSDCARDMounted()) {
-                        String folderName = "PhotoEditorSDK";
+                        String folderName = getIntent().getExtras().getString("editedImageDirectory", "PhotoEditorSDK");
                         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), folderName);
                         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
                             Log.d("PhotoEditorSDK", "Failed to create directory");
@@ -479,7 +539,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 // String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
                 // File file = new File(selectedImagePath);
                 String newPath = getCacheDir() + imageName;
-	            File file = new File(newPath);
+                File file = new File(newPath);
 
                 try {
                     FileOutputStream out = new FileOutputStream(file);
@@ -576,6 +636,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             eraseDrawing();
         } else if (v.getId() == R.id.go_to_next_screen_tv) {
             returnBackWithUpdateImage();
+        } else if (v.getId() == R.id.change_background_btn){
+            openChangeBackgroundColorPopupWindow();
         }
     }
 

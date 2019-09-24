@@ -14,6 +14,7 @@ import com.facebook.react.bridge.ReadableMap;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -37,9 +38,10 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
           if (resultCode == Activity.RESULT_CANCELED) {
             mCancelCallback.invoke(resultCode);
           } else {
-            mDoneCallback.invoke(intent.getExtras().getString("imagePath"));
+            String path = intent.getExtras().getString("imagePath");
+            Log.d("RNPhotoEditorModule", "edited file path = " + path);
+            mDoneCallback.invoke(path);
           }
-
         }
 
         mCancelCallback = null;
@@ -64,7 +66,9 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void Edit(final ReadableMap props, final Callback onDone, final Callback onCancel) {
+    Log.d("RNPhotoEditorModule", props.toString());
     String path = props.getString("path");
+    String targetImageDirectoryName = props.getString("editedImageDirectory");
 
     //Process Stickers
     ReadableArray stickers = props.getArray("stickers");
@@ -95,10 +99,10 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
 
     Intent intent = new Intent(getCurrentActivity(), PhotoEditorActivity.class);
     intent.putExtra("selectedImagePath", path);
+    intent.putExtra("editedImageDirectory", targetImageDirectoryName);
     intent.putExtra("colorPickerColors", colorPickerColors);
     intent.putExtra("hiddenControls", hiddenControlsIntent);
     intent.putExtra("stickers", stickersIntent);
-
 
     mCancelCallback = onCancel;
     mDoneCallback = onDone;

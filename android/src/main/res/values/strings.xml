@@ -17,7 +17,7 @@
 
     <string name="ic_close">"\ue918"</string>
     <string name="ic_text">"\ue945"</string>
-    <string name="ic_draw">""\ue944</string>
+    <string name="ic_draw">"\ue944"</string>
     <string name="ic_images">"\ue949"</string>
     <string name="ic_save">"\ue946"</string>
     <string name="ic_clear_all">"\ue947"</string>
