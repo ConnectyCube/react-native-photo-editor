@@ -69,6 +69,7 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
     Log.d("RNPhotoEditorModule", props.toString());
     String path = props.getString("path");
     String targetImageDirectoryName = props.getString("editedImageDirectory");
+    String colorPrimary = props.getString("colorPrimary");
 
     //Process Stickers
     ReadableArray stickers = props.getArray("stickers");
@@ -100,6 +101,7 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
     Intent intent = new Intent(getCurrentActivity(), PhotoEditorActivity.class);
     intent.putExtra("selectedImagePath", path);
     intent.putExtra("editedImageDirectory", targetImageDirectoryName);
+    intent.putExtra("colorPrimary", colorPrimary);
     intent.putExtra("colorPickerColors", colorPickerColors);
     intent.putExtra("hiddenControls", hiddenControlsIntent);
     intent.putExtra("stickers", stickersIntent);

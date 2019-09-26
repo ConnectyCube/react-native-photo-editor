@@ -8,9 +8,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -20,6 +22,7 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,15 +44,15 @@ import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.ahmedadeltito.photoeditor.widget.SlidingUpPanelLayout;
+import com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker;
 import com.ahmedadeltito.photoeditorsdk.BrushDrawingView;
 import com.ahmedadeltito.photoeditorsdk.OnPhotoEditorSDKListener;
 import com.ahmedadeltito.photoeditorsdk.PhotoEditorSDK;
 import com.ahmedadeltito.photoeditorsdk.ViewType;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.viewpagerindicator.PageIndicator;
 
 import java.io.BufferedOutputStream;
@@ -63,6 +66,10 @@ import java.util.Date;
 import java.util.List;
 
 import ui.photoeditor.R;
+
+import static android.view.inputmethod.InputMethodManager.SHOW_FORCED;
+import static android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT;
+
 public class PhotoEditorActivity extends AppCompatActivity implements View.OnClickListener, OnPhotoEditorSDKListener {
 
     public static Typeface emojiFont = null;
@@ -72,7 +79,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
     private final String TAG = "PhotoEditorActivity";
     private RelativeLayout parentImageRelativeLayout;
-    private RecyclerView drawingViewColorPickerRecyclerView;
+    private VerticalSlideColorPicker mainColorPicker;
     private TextView undoTextView, undoTextTextView, doneDrawingTextView, eraseDrawingTextView;
     private SlidingUpPanelLayout mLayout;
     private View topShadow;
@@ -80,24 +87,27 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private View bottomShadow;
     private RelativeLayout bottomShadowRelativeLayout;
     private ArrayList<Integer> colorPickerColors;
-    private int colorCodeTextView = -1;
+    private int colorCodeTextView = 0;
     private PhotoEditorSDK photoEditorSDK;
     private int imageOrientation;
     private ImageView backgroundImageView;
     private Bitmap backgroundBitMap;
     private int currentBackgroundColor = 0;
+    private int colorPrimary = Color.parseColor("#017525");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_editor);
 
+        initPrimaryColor();
+
         String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
 
-        if (selectedImagePath == null){
+        if (TextUtils.isEmpty(selectedImagePath)) {
             backgroundBitMap = Bitmap.createBitmap(DeviceUtils.getDeviceWidth(this), DeviceUtils.getDeviceHeight(this), Bitmap.Config.RGB_565);
             currentBackgroundColor = getResources().getColor(R.color.white);
             imageOrientation = ExifInterface.ORIENTATION_NORMAL;
@@ -123,14 +133,14 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         emojiFont = getFontFromRes(R.raw.emojioneandroid);
 
         BrushDrawingView brushDrawingView = (BrushDrawingView) findViewById(R.id.drawing_view);
-        drawingViewColorPickerRecyclerView = (RecyclerView) findViewById(R.id.drawing_view_color_picker_recycler_view);
+        mainColorPicker = (VerticalSlideColorPicker) findViewById(R.id.main_color_picker);
         parentImageRelativeLayout = (RelativeLayout) findViewById(R.id.parent_image_rl);
         TextView closeTextView = (TextView) findViewById(R.id.close_tv);
         TextView addTextView = (TextView) findViewById(R.id.add_text_tv);
         TextView addPencil = (TextView) findViewById(R.id.add_pencil_tv);
         RelativeLayout deleteRelativeLayout = (RelativeLayout) findViewById(R.id.delete_rl);
         TextView deleteTextView = (TextView) findViewById(R.id.delete_tv);
-        ImageView changeBackgroundBtn = (ImageView) findViewById(R.id.change_background_btn);
+        TextView changeBackgroundBtn = (TextView) findViewById(R.id.change_background_btn);
         TextView addImageEmojiTextView = (TextView) findViewById(R.id.add_image_emoji_tv);
         TextView saveTextView = (TextView) findViewById(R.id.save_tv);
         TextView saveTextTextView = (TextView) findViewById(R.id.save_text_tv);
@@ -153,10 +163,13 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
         backgroundImageView.setImageBitmap(backgroundBitMap);
 
+        mainColorPicker.setColorPrimary(colorPrimary);
+        mainColorPicker.setStartColor(Color.BLACK);
+
         closeTextView.setTypeface(newFont);
         addTextView.setTypeface(newFont);
         addPencil.setTypeface(newFont);
-//        changeBackgroundBtn.setTypeface(newFont);
+        changeBackgroundBtn.setTypeface(newFont);
         changeBackgroundBtn.setVisibility(currentBackgroundColor == 0 ? View.GONE : View.VISIBLE);
         addImageEmojiTextView.setTypeface(newFont);
         saveTextView.setTypeface(newFont);
@@ -237,19 +250,18 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             colorPickerColors = intentColors;
         } else {
             colorPickerColors.add(getResources().getColor(R.color.black));
-            colorPickerColors.add(getResources().getColor(R.color.blue_color_picker));
             colorPickerColors.add(getResources().getColor(R.color.brown_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.green_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.orange_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.red_color_picker));
             colorPickerColors.add(getResources().getColor(R.color.red_orange_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.sky_blue_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.violet_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.white));
+            colorPickerColors.add(getResources().getColor(R.color.orange_color_picker));
             colorPickerColors.add(getResources().getColor(R.color.yellow_color_picker));
             colorPickerColors.add(getResources().getColor(R.color.yellow_green_color_picker));
+            colorPickerColors.add(getResources().getColor(R.color.green_color_picker));
+            colorPickerColors.add(getResources().getColor(R.color.sky_blue_color_picker));
+            colorPickerColors.add(getResources().getColor(R.color.blue_color_picker));
+            colorPickerColors.add(getResources().getColor(R.color.violet_color_picker));
+            colorPickerColors.add(getResources().getColor(R.color.red_color_picker));
+            colorPickerColors.add(getResources().getColor(R.color.white));
         }
-
 
         new CountDownTimer(500, 100) {
 
@@ -263,7 +275,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         }.start();
 
         ArrayList hiddenControls = (ArrayList<Integer>) getIntent().getExtras().getSerializable("hiddenControls");
-        for (int i = 0;i < hiddenControls.size();i++) {
+        for (int i = 0; i < hiddenControls.size(); i++) {
             if (hiddenControls.get(i).toString().equalsIgnoreCase("text")) {
                 addTextView.setVisibility(View.INVISIBLE);
             }
@@ -286,6 +298,18 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             }
             if (hiddenControls.get(i).toString().equalsIgnoreCase("sticker")) {
                 addImageEmojiTextView.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    private void initPrimaryColor() {
+        String colorPrimary = getIntent().getExtras().getString("colorPrimary");
+        if (!TextUtils.isEmpty(colorPrimary)) {
+            try {
+                int color = Color.parseColor(colorPrimary);
+                if (color != 0) this.colorPrimary = color;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -332,68 +356,79 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         photoEditorSDK.brushEraser();
     }
 
-    private void openAddTextPopupWindow(String text, int colorCode) {
-        colorCodeTextView = colorCode;
+    private void openAddTextPopupWindow(String text, final int colorCode) {
+        final int[] tempColor = new int[1];
+        tempColor[0] = colorCode;
+
+        final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(SHOW_FORCED, 0);
+
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View addTextPopupWindowRootView = inflater.inflate(R.layout.add_text_popup_window, null);
-        final EditText addTextEditText = (EditText) addTextPopupWindowRootView.findViewById(R.id.add_text_edit_text);
-        TextView addTextDoneTextView = (TextView) addTextPopupWindowRootView.findViewById(R.id.add_text_done_tv);
-        RecyclerView addTextColorPickerRecyclerView = (RecyclerView) addTextPopupWindowRootView.findViewById(R.id.add_text_color_picker_recycler_view);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(PhotoEditorActivity.this, LinearLayoutManager.HORIZONTAL, false);
-        addTextColorPickerRecyclerView.setLayoutManager(layoutManager);
-        addTextColorPickerRecyclerView.setHasFixedSize(true);
-        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(PhotoEditorActivity.this, colorPickerColors);
-        colorPickerAdapter.setOnColorPickerClickListener(new ColorPickerAdapter.OnColorPickerClickListener() {
-            @Override
-            public void onColorPickerClickListener(int colorCode) {
-                addTextEditText.setTextColor(colorCode);
-                colorCodeTextView = colorCode;
-            }
-        });
-        addTextColorPickerRecyclerView.setAdapter(colorPickerAdapter);
-        if (stringIsNotEmpty(text)) {
-            addTextEditText.setText(text);
-            addTextEditText.setTextColor(colorCode == -1 ? getResources().getColor(R.color.white) : colorCode);
-        }
+        final View addTextPopupWindowRootView = inflater.inflate(R.layout.add_text_popup_window, null);
+
         final PopupWindow pop = new PopupWindow(PhotoEditorActivity.this);
         pop.setContentView(addTextPopupWindowRootView);
         pop.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
         pop.setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
         pop.setFocusable(true);
         pop.setBackgroundDrawable(null);
-        pop.showAtLocation(addTextPopupWindowRootView, Gravity.TOP, 0, 0);
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-        addTextDoneTextView.setOnClickListener(new View.OnClickListener() {
+
+        final EditText addTextEditText = addTextPopupWindowRootView.findViewById(R.id.add_text_edit_text);
+        if (stringIsNotEmpty(text)) {
+            addTextEditText.setText(text);
+            addTextEditText.setTextColor(colorCode == 0 ? getResources().getColor(R.color.white) : colorCode);
+        }
+
+        addTextEditText.requestFocus();
+
+        FloatingActionButton saveTextBtn = addTextPopupWindowRootView.findViewById(R.id.save_text_btn);
+        saveTextBtn.setBackgroundTintList(ColorStateList.valueOf(colorPrimary));
+        saveTextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                colorCodeTextView = tempColor[0];
                 addText(addTextEditText.getText().toString(), colorCodeTextView);
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 pop.dismiss();
             }
         });
+
+        VerticalSlideColorPicker colorPicker = addTextPopupWindowRootView.findViewById(R.id.color_picker_vertical);
+        colorPicker.setOnColorChangeListener(new VerticalSlideColorPicker.OnColorChangeListener() {
+            @Override
+            public void onColorChange(int selectedColor) {
+                tempColor[0] = selectedColor;
+                addTextEditText.setTextColor(selectedColor);
+            }
+        });
+        colorPicker.setStartColor(colorCodeTextView == 0 ? getResources().getColor(R.color.white) : colorCodeTextView);
+        colorPicker.setColorPrimary(colorPrimary);
+
+        ImageView backBtn = addTextPopupWindowRootView.findViewById(R.id.back_btn);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pop.dismiss();
+            }
+        });
+
+        pop.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                imm.toggleSoftInput(SHOW_IMPLICIT, 0);
+                updateView(View.VISIBLE);
+            }
+        });
+
+        updateView(View.GONE);
+        pop.showAtLocation(addTextPopupWindowRootView, Gravity.TOP, 0, 0);
     }
 
     private void openChangeBackgroundColorPopupWindow() {
         final int[] tempColor = new int[1];
         tempColor[0] = currentBackgroundColor;
+
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View changeBackgroundPopupWindowRootView = inflater.inflate(R.layout.change_background_color_popup_window, null);
-        final TextView changeBackgroundTextView = changeBackgroundPopupWindowRootView.findViewById(R.id.change_bg_done_tv);
-        RecyclerView addTextColorPickerRecyclerView = changeBackgroundPopupWindowRootView.findViewById(R.id.change_bg_color_picker_recycler_view);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(PhotoEditorActivity.this, LinearLayoutManager.HORIZONTAL, false);
-        addTextColorPickerRecyclerView.setLayoutManager(layoutManager);
-        addTextColorPickerRecyclerView.setHasFixedSize(true);
-        final ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(PhotoEditorActivity.this, colorPickerColors);
-        colorPickerAdapter.setOnColorPickerClickListener(new ColorPickerAdapter.OnColorPickerClickListener() {
-            @Override
-            public void onColorPickerClickListener(int colorCode) {
-                tempColor[0] = colorCode;
-                changeBackgroundColor(colorCode);
-            }
-        });
-        addTextColorPickerRecyclerView.setAdapter(colorPickerAdapter);
 
         final PopupWindow pop = new PopupWindow(PhotoEditorActivity.this);
         pop.setContentView(changeBackgroundPopupWindowRootView);
@@ -401,16 +436,6 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         pop.setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
         pop.setFocusable(true);
         pop.setBackgroundDrawable(null);
-        pop.showAtLocation(changeBackgroundPopupWindowRootView, Gravity.TOP, 0, 0);
-        updateView(View.GONE);
-
-        changeBackgroundTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                currentBackgroundColor = tempColor[0];
-                pop.dismiss();
-            }
-        });
         pop.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
@@ -418,6 +443,38 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 updateView(View.VISIBLE);
             }
         });
+
+        FloatingActionButton saveBackgroundBtn = changeBackgroundPopupWindowRootView.findViewById(R.id.save_background_color_btn);
+        saveBackgroundBtn.setBackgroundTintList(ColorStateList.valueOf(colorPrimary));
+        saveBackgroundBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                currentBackgroundColor = tempColor[0];
+                pop.dismiss();
+            }
+        });
+
+        VerticalSlideColorPicker colorPicker = changeBackgroundPopupWindowRootView.findViewById(R.id.color_picker_vertical);
+        colorPicker.setOnColorChangeListener(new VerticalSlideColorPicker.OnColorChangeListener() {
+            @Override
+            public void onColorChange(int selectedColor) {
+                tempColor[0] = selectedColor;
+                changeBackgroundColor(selectedColor);
+            }
+        });
+        colorPicker.setStartColor(tempColor[0]);
+        colorPicker.setColorPrimary(colorPrimary);
+
+        ImageView backBtn = changeBackgroundPopupWindowRootView.findViewById(R.id.back_btn);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pop.dismiss();
+            }
+        });
+
+        updateView(View.GONE);
+        pop.showAtLocation(changeBackgroundPopupWindowRootView, Gravity.TOP, 0, 0);
     }
 
     private void updateView(int visibility) {
@@ -431,23 +488,18 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         photoEditorSDK.setBrushDrawingMode(brushDrawingMode);
         if (brushDrawingMode) {
             updateView(View.GONE);
-            drawingViewColorPickerRecyclerView.setVisibility(View.VISIBLE);
+            mainColorPicker.setVisibility(View.VISIBLE);
             doneDrawingTextView.setVisibility(View.VISIBLE);
             eraseDrawingTextView.setVisibility(View.VISIBLE);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(PhotoEditorActivity.this, LinearLayoutManager.HORIZONTAL, false);
-            drawingViewColorPickerRecyclerView.setLayoutManager(layoutManager);
-            drawingViewColorPickerRecyclerView.setHasFixedSize(true);
-            ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(PhotoEditorActivity.this, colorPickerColors);
-            colorPickerAdapter.setOnColorPickerClickListener(new ColorPickerAdapter.OnColorPickerClickListener() {
+            mainColorPicker.setOnColorChangeListener(new VerticalSlideColorPicker.OnColorChangeListener() {
                 @Override
-                public void onColorPickerClickListener(int colorCode) {
-                    photoEditorSDK.setBrushColor(colorCode);
+                public void onColorChange(int selectedColor) {
+                    photoEditorSDK.setBrushColor(selectedColor);
                 }
             });
-            drawingViewColorPickerRecyclerView.setAdapter(colorPickerAdapter);
         } else {
             updateView(View.VISIBLE);
-            drawingViewColorPickerRecyclerView.setVisibility(View.GONE);
+            mainColorPicker.setVisibility(View.INVISIBLE);
             doneDrawingTextView.setVisibility(View.GONE);
             eraseDrawingTextView.setVisibility(View.GONE);
         }
@@ -474,7 +526,11 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                     Intent returnIntent = new Intent();
 
                     if (isSDCARDMounted()) {
-                        String folderName = getIntent().getExtras().getString("editedImageDirectory", "PhotoEditorSDK");
+                        String folderName = getIntent().getExtras().getString("editedImageDirectory");
+                        if (TextUtils.isEmpty(folderName)) {
+                            folderName = "PhotoEditorSDK";
+                        }
+
                         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), folderName);
                         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
                             Log.d("PhotoEditorSDK", "Failed to create directory");
@@ -615,13 +671,22 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    public void onBackPressed() {
+        if (mainColorPicker.getVisibility() == View.VISIBLE) {
+            updateBrushDrawingView(false);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         if (v.getId() == R.id.close_tv) {
             onBackPressed();
         } else if (v.getId() == R.id.add_image_emoji_tv) {
             mLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         } else if (v.getId() == R.id.add_text_tv) {
-            openAddTextPopupWindow("", -1);
+            openAddTextPopupWindow("", colorCodeTextView);
         } else if (v.getId() == R.id.add_pencil_tv) {
             updateBrushDrawingView(true);
         } else if (v.getId() == R.id.done_drawing_tv) {
@@ -636,7 +701,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             eraseDrawing();
         } else if (v.getId() == R.id.go_to_next_screen_tv) {
             returnBackWithUpdateImage();
-        } else if (v.getId() == R.id.change_background_btn){
+        } else if (v.getId() == R.id.change_background_btn) {
             openChangeBackgroundColorPopupWindow();
         }
     }
@@ -735,26 +800,23 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private Typeface getFontFromRes(int resource)
-    {
+    private Typeface getFontFromRes(int resource) {
         Typeface tf = null;
         InputStream is = null;
         try {
             is = getResources().openRawResource(resource);
-        }
-        catch(Resources.NotFoundException e) {
+        } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Could not find font in resources!");
         }
 
         String outPath = getCacheDir() + "/tmp" + System.currentTimeMillis() + ".raw";
 
-        try
-        {
+        try {
             byte[] buffer = new byte[is.available()];
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(outPath));
 
             int l = 0;
-            while((l = is.read(buffer)) > 0)
+            while ((l = is.read(buffer)) > 0)
                 bos.write(buffer, 0, l);
 
             bos.close();
@@ -763,9 +825,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
             // clean up
             new File(outPath).delete();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             Log.e(TAG, "Error reading in font!");
             return null;
         }

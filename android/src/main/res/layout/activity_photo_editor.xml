@@ -64,7 +64,8 @@
                 android:text="@string/done"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
             <TextView
                 android:id="@+id/erase_drawing_tv"
@@ -82,13 +83,23 @@
                 android:text="@string/erase"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/drawing_view_color_picker_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true" />
+            <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
+                android:id="@+id/main_color_picker"
+                android:layout_width="24dp"
+                android:layout_height="260dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:layout_marginRight="20dp"
+                app:borderColor="@android:color/transparent"
+                app:borderWidth="8dp"
+                app:selectorColor="@color/white"
+                android:visibility="invisible"
+                tools:visibility="visible"/>
 
             <View
                 android:id="@+id/top_shadow"
@@ -146,16 +157,15 @@
                     android:textColor="#FFFFFF"
                     android:textSize="20sp" />
 
-                <ImageView
+                <TextView
                     android:id="@+id/change_background_btn"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignTop="@+id/add_image_emoji_tv"
-                    android:layout_alignBottom="@+id/add_image_emoji_tv"
-                    android:layout_marginEnd="12dp"
-                    android:layout_marginRight="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_toStartOf="@+id/add_image_emoji_tv"
-                    android:src="@drawable/ic_fill_color" />
+                    android:padding="15dp"
+                    android:text="@string/ic_fill_color"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp" />
 
             </RelativeLayout>
 

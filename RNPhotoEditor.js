@@ -22,6 +22,7 @@ export default function PhotoEditor(props) {
     const {
         colors = defaultColors,
         editedImageDirectory = null,
+        colorPrimary = null,
         hiddenControls = [],
         onCancel = () => {},
         onDone = () => {},
@@ -34,6 +35,7 @@ export default function PhotoEditor(props) {
             hiddenControls,
             onCancel,
             editedImageDirectory,
+            colorPrimary,
             onDone,
             path,
             stickers

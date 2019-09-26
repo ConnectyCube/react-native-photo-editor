@@ -1,47 +1,65 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B3000000"
+    android:background="#80000000"
     android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/add_text_done_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="20dp"
-        android:background="@drawable/rounded_border_text_view"
-        android:padding="10dp"
-        android:text="@string/done"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="15sp" />
 
     <EditText
         android:id="@+id/add_text_edit_text"
         style="@style/EditText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/add_text_color_picker_relative_layout"
-        android:layout_below="@+id/add_text_done_tv"
+        android:layout_above="@+id/save_text_btn"
         android:background="@null"
         android:gravity="center"
         android:inputType="textMultiLine"
-        android:textSize="40sp" />
+        android:textSize="40sp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
 
-    <RelativeLayout
-        android:id="@+id/add_text_color_picker_relative_layout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentTop="true"
+        android:background="@drawable/fading_shadow"
+        android:minHeight="?attr/actionBarSize"
+        android:orientation="horizontal">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/add_text_color_picker_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/back_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="start|center_vertical"
+            android:layout_margin="16dp"
+            android:background="?actionBarItemBackground"
+            android:src="@drawable/ic_arrow_left"
+            android:text="@string/undo" />
+    </LinearLayout>
 
-    </RelativeLayout>
+    <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
+        android:id="@+id/color_picker_vertical"
+        android:layout_width="24dp"
+        android:layout_height="260dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
+        app:borderColor="@android:color/transparent"
+        app:borderWidth="8dp"
+        app:selectorColor="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/save_text_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/save"
+        android:elevation="5dp"
+        android:src="@drawable/ic_check" />
 
 </RelativeLayout>

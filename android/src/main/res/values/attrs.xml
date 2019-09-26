@@ -27,4 +27,11 @@
         <attr name="realtimeOverlayColor" format="color"/>
     </declare-styleable>
 
+    <declare-styleable name="VerticalSlideColorPicker">
+        <attr name="borderColor" format="color" />
+        <attr name="selectorColor" format="color" />
+        <attr name="borderWidth" format="dimension" />
+        <attr name="colors" format="reference" />
+    </declare-styleable>
+
 </resources>
