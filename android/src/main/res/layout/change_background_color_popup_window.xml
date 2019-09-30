@@ -34,8 +34,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
         app:borderColor="@android:color/transparent"
-        app:borderWidth="8dp"
-        app:selectorColor="@color/white" />
+        app:borderWidth="8dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/save_background_color_btn"

@@ -20,11 +20,11 @@
 
     <array name="default_colors">
         <item>@color/black</item>
+        <item>@color/white</item>
         <item>#ff0000</item>
         <item>#ffff00</item>
         <item>#00ffff</item>
         <item>#ff00ff</item>
-        <item>@color/white</item>
     </array>
 
 </resources>

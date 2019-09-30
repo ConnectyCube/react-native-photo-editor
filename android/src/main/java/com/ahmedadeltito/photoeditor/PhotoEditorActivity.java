@@ -142,8 +142,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         TextView deleteTextView = (TextView) findViewById(R.id.delete_tv);
         TextView changeBackgroundBtn = (TextView) findViewById(R.id.change_background_btn);
         TextView addImageEmojiTextView = (TextView) findViewById(R.id.add_image_emoji_tv);
-        TextView saveTextView = (TextView) findViewById(R.id.save_tv);
-        TextView saveTextTextView = (TextView) findViewById(R.id.save_text_tv);
+//        TextView saveTextView = (TextView) findViewById(R.id.save_tv);
+//        TextView saveTextTextView = (TextView) findViewById(R.id.save_text_tv);
         undoTextView = (TextView) findViewById(R.id.undo_tv);
         undoTextTextView = (TextView) findViewById(R.id.undo_text_tv);
         doneDrawingTextView = (TextView) findViewById(R.id.done_drawing_tv);
@@ -172,7 +172,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         changeBackgroundBtn.setTypeface(newFont);
         changeBackgroundBtn.setVisibility(currentBackgroundColor == 0 ? View.GONE : View.VISIBLE);
         addImageEmojiTextView.setTypeface(newFont);
-        saveTextView.setTypeface(newFont);
+//        saveTextView.setTypeface(newFont);
         undoTextView.setTypeface(newFont);
         clearAllTextView.setTypeface(newFont);
         goToNextTextView.setTypeface(newFont);
@@ -233,8 +233,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         changeBackgroundBtn.setOnClickListener(this);
         addTextView.setOnClickListener(this);
         addPencil.setOnClickListener(this);
-        saveTextView.setOnClickListener(this);
-        saveTextTextView.setOnClickListener(this);
+//        saveTextView.setOnClickListener(this);
+//        saveTextTextView.setOnClickListener(this);
         undoTextView.setOnClickListener(this);
         undoTextTextView.setOnClickListener(this);
         doneDrawingTextView.setOnClickListener(this);
@@ -290,8 +290,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 addPencil.setVisibility(View.INVISIBLE);
             }
             if (hiddenControls.get(i).toString().equalsIgnoreCase("save")) {
-                saveTextTextView.setVisibility(View.INVISIBLE);
-                saveTextView.setVisibility(View.INVISIBLE);
+//                saveTextTextView.setVisibility(View.INVISIBLE);
+//                saveTextView.setVisibility(View.INVISIBLE);
             }
             if (hiddenControls.get(i).toString().equalsIgnoreCase("share")) {
 
@@ -700,7 +700,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         } else if (v.getId() == R.id.erase_drawing_tv) {
             eraseDrawing();
         } else if (v.getId() == R.id.go_to_next_screen_tv) {
-            returnBackWithUpdateImage();
+            returnBackWithSavedImage();
         } else if (v.getId() == R.id.change_background_btn) {
             openChangeBackgroundColorPopupWindow();
         }

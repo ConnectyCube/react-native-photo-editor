@@ -43,6 +43,7 @@ public class VerticalSlideColorPicker extends View {
     private float selectorBorderWidth = 4f;
     private boolean cacheBitmap = true;
     private int startColor;
+    private int selectedColor = Color.BLACK;
     private int colorPrimary = Color.parseColor("#017525");
 
     public VerticalSlideColorPicker(Context context) {
@@ -59,7 +60,7 @@ public class VerticalSlideColorPicker extends View {
 
         try {
             borderColor = a.getColor(R.styleable.VerticalSlideColorPicker_borderColor, Color.WHITE);
-            selectorColor = a.getColor(R.styleable.VerticalSlideColorPicker_selectorColor, Color.WHITE);
+            selectorColor = a.getColor(R.styleable.VerticalSlideColorPicker_selectorColor, 0);
             borderWidth = a.getDimension(R.styleable.VerticalSlideColorPicker_borderWidth, 8f);
             int colorsResourceId = a.getResourceId(R.styleable.VerticalSlideColorPicker_colors, R.array.default_colors);
             colors = a.getResources().getIntArray(colorsResourceId);
@@ -94,11 +95,6 @@ public class VerticalSlideColorPicker extends View {
         strokePaint.setAntiAlias(true);
         strokePaint.setStrokeWidth(borderWidth);
 
-        selectorPaint = new Paint();
-        selectorPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        selectorPaint.setColor(selectorColor);
-        selectorPaint.setAntiAlias(true);
-
         setDrawingCacheEnabled(true);
     }
 
@@ -122,7 +118,7 @@ public class VerticalSlideColorPicker extends View {
                 invalidate();
             }
         } else {
-            canvas.drawCircle(centerX, selectorYPos, viewWidth / 2, selectorPaint);
+            canvas.drawCircle(centerX, selectorYPos, viewWidth / 2, getSelectorPaint());
             canvas.drawCircle(centerX, selectorYPos, viewWidth / 2 - selectorBorderWidth / 2, getSelectorBorderPaint());
         }
     }
@@ -134,11 +130,7 @@ public class VerticalSlideColorPicker extends View {
 
         selectorYPos = yPos;
 
-//        if (!bitmap.isRecycled()){
-//            bitmap.recycle();
-//        }
-
-        int selectedColor = bitmap.getPixel(viewWidth / 2, (int) selectorYPos);
+        selectedColor = bitmap.getPixel(viewWidth / 2, (int) selectorYPos);
 
         if (onColorChangeListener != null) {
             onColorChangeListener.onColorChange(selectedColor);
@@ -200,10 +192,11 @@ public class VerticalSlideColorPicker extends View {
             int foundColor = bitmap.getPixel(viewWidth / 2, i);
             if (foundColor == startColor) {
                 selectorYPos = i;
+                selectedColor = startColor;
                 if (!cacheBitmap) {
                     invalidate();
                     if (onColorChangeListener != null) {
-                        onColorChangeListener.onColorChange(startColor);
+                        onColorChangeListener.onColorChange(selectedColor);
                     }
                 }
                 return;
@@ -217,7 +210,7 @@ public class VerticalSlideColorPicker extends View {
         selectorYPos = borderWidth + colorPickerRadius;
 
         if (onColorChangeListener != null) {
-            onColorChangeListener.onColorChange(Color.TRANSPARENT);
+            onColorChangeListener.onColorChange(selectedColor);
         }
 
         invalidate();
@@ -242,6 +235,31 @@ public class VerticalSlideColorPicker extends View {
         }
 
         return selectorBorderPaint;
+    }
+
+
+    private Paint getSelectorPaint() {
+        if (selectorPaint == null) {
+            selectorPaint = new Paint();
+            selectorPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            selectorPaint.setAntiAlias(true);
+        }
+
+        selectorPaint.setColor(getSelectorColor());
+
+        return selectorPaint;
+    }
+
+    private int getSelectorColor() {
+        if (selectorColor == 0) {
+            return getSelectedColor();
+        } else {
+            return selectorColor;
+        }
+    }
+
+    private int getSelectedColor() {
+        return selectedColor;
     }
 
     public interface OnColorChangeListener {
