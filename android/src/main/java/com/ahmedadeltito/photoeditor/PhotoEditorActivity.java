@@ -109,7 +109,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
         if (TextUtils.isEmpty(selectedImagePath)) {
             backgroundBitMap = Bitmap.createBitmap(DeviceUtils.getDeviceWidth(this), DeviceUtils.getDeviceHeight(this), Bitmap.Config.RGB_565);
-            currentBackgroundColor = getResources().getColor(R.color.white);
+            currentBackgroundColor = getResources().getColor(R.color.initial);
             imageOrientation = ExifInterface.ORIENTATION_NORMAL;
             backgroundBitMap.eraseColor(currentBackgroundColor);
         } else {
