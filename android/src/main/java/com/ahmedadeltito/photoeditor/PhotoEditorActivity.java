@@ -570,7 +570,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                     finish();
                 }
             }.start();
-            Toast.makeText(this, getString(R.string.save_image_succeed), Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, getString(R.string.save_image_succeed), Toast.LENGTH_SHORT).show();
         } else {
             showPermissionRequest();
         }
