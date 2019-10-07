@@ -89,6 +89,7 @@
             <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
                 android:id="@+id/main_color_picker"
                 android:layout_width="24dp"
+                android:layout_height="260dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
@@ -98,7 +99,6 @@
                 app:borderWidth="8dp"
                 android:visibility="invisible"
                 tools:visibility="visible"/>
-                android:layout_height="260dp"
 
             <View
                 android:id="@+id/top_shadow"
@@ -147,22 +147,23 @@
                     android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/add_crop_tv"
+                    android:id="@+id/add_image_emoji_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toStartOf="@+id/add_pencil_tv"
                     android:padding="15dp"
-                    android:text="@string/ic_crop"
+                    android:text="@string/ic_images"
                     android:textColor="#FFFFFF"
                     android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/add_image_emoji_tv"
+                    android:id="@+id/add_crop_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/add_crop_tv"
+                    android:layout_toStartOf="@+id/add_image_emoji_tv"
+                    android:layout_toLeftOf="@+id/add_image_emoji_tv"
                     android:padding="15dp"
-                    android:text="@string/ic_images"
+                    android:text="@string/ic_crop"
                     android:textColor="#FFFFFF"
                     android:textSize="20sp" />
 
@@ -170,8 +171,8 @@
                     android:id="@+id/change_background_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/add_image_emoji_tv"
-                    android:layout_toLeftOf="@+id/add_image_emoji_tv"
+                    android:layout_toStartOf="@+id/add_crop_tv"
+                    android:layout_toLeftOf="@+id/add_crop_tv"
                     android:padding="15dp"
                     android:text="@string/ic_fill_color"
                     android:textColor="#FFFFFF"

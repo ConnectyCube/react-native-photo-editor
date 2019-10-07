@@ -24,7 +24,7 @@
     <string name="ic_continue">"\ue948"</string>
     <string name="ic_delete">"\ue92c"</string>
     <string name="ic_fill_color">"\ue94b"</string>
-    <string name="ic_crop">&#xf565;</string>
+    <string name="ic_crop">"\ue94c"</string>
     <string name="choose_from_gallery">Choose From Gallery</string>
     <string name="choose_from_camera">Choose From Camera</string>
     <string name="undo">Undo</string>

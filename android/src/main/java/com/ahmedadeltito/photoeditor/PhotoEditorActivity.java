@@ -22,17 +22,6 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import androidx.annotation.NonNull;
-import androidx.exifinterface.media.ExifInterface;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.core.content.PermissionChecker;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -65,6 +54,8 @@ import com.ahmedadeltito.photoeditorsdk.PhotoEditorSDK;
 import com.ahmedadeltito.photoeditorsdk.ViewType;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.viewpagerindicator.PageIndicator;
+import com.yalantis.ucrop.UCrop;
+import com.yalantis.ucrop.UCropActivity;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -74,12 +65,8 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
 import java.util.List;
 import java.util.UUID;
-
-import com.yalantis.ucrop.UCrop;
-import com.yalantis.ucrop.UCropActivity;
 
 import ui.photoeditor.R;
 
@@ -117,7 +104,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private boolean showCropGuidelines = true;
     private boolean hideBottomControls = false;
 
-    private ImageView photoEditImageView;
+    private String selectedImagePath;
 
 
     @Override
@@ -127,7 +114,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
         initPrimaryColor();
 
-        String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
+        selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
@@ -155,7 +142,6 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         }
 
         Typeface newFont = getFontFromRes(R.raw.eventtusicons);
-        Typeface fontAwesome = getFontFromRes(R.raw.font_awesome_solid);
 
         emojiFont = getFontFromRes(R.raw.emojioneandroid);
 
@@ -200,7 +186,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         changeBackgroundBtn.setTypeface(newFont);
         changeBackgroundBtn.setVisibility(currentBackgroundColor == 0 ? View.GONE : View.VISIBLE);
         addImageEmojiTextView.setTypeface(newFont);
-        addCropTextView.setTypeface(fontAwesome);
+        addCropTextView.setTypeface(newFont);
 //        saveTextView.setTypeface(newFont);
         undoTextView.setTypeface(newFont);
         clearAllTextView.setTypeface(newFont);
@@ -625,8 +611,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
                 String imageName = "/IMG_" + timeStamp + ".jpg";
 
-                // String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
-                // File file = new File(selectedImagePath);
+//                 String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
+//                 File file = new File(selectedImagePath);
                 String newPath = getCacheDir() + imageName;
                 File file = new File(newPath);
 
@@ -653,7 +639,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 }
 
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra("imagePath", selectedImagePath);
+                returnIntent.putExtra("imagePath", newPath);
                 setResult(Activity.RESULT_OK, returnIntent);
 
                 finish();
@@ -886,7 +872,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 UCropActivity.ALL, // When 'rotate'-tab active
                 UCropActivity.ALL  // When 'aspect ratio'-tab active
         );
-
+        options.setActiveWidgetColor(colorPrimary);
+        options.setToolbarColor(colorPrimary);
+        options.setStatusBarColor(colorPrimary);
 
         UCrop uCrop = UCrop
                 .of(uri, Uri.fromFile(new File(this.getTmpDir(this), UUID.randomUUID().toString() + ".jpg")))
@@ -911,8 +899,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 if (resultUri != null) {
                     try {
                         selectedImagePath = resultUri.toString();
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver() , resultUri);
-                        photoEditImageView.setImageBitmap(bitmap);
+                        backgroundBitMap = MediaStore.Images.Media.getBitmap(this.getContentResolver() , resultUri);
+                        backgroundImageView.setImageBitmap(backgroundBitMap);
                     } catch (Exception ex) {
                         System.out.println("NO IMAGE DATA FOUND");
                     }
@@ -924,6 +912,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             }
         }
     }
+
     @TargetApi(Build.VERSION_CODES.KITKAT)
     protected String getPath(final Uri uri) {
         // DocumentProvider
