@@ -1,24 +1,13 @@
-import { NativeModules } from 'react-native'
+import React, { PureComponent } from "react";
+import { ViewPropTypes, NativeModules, Platform } from "react-native";
+import PropTypes from "prop-types";
 
-const { RNPhotoEditor } = NativeModules
+const { RNPhotoEditor } = NativeModules;
 
-const defaultColors = [
-    '#000000',
-    '#808080',
-    '#a9a9a9',
-    '#FFFFFF',
-    '#0000ff',
-    '#00ff00',
-    '#ff0000',
-    '#ffff00',
-    '#ffa500',
-    '#800080',
-    '#00ffff',
-    '#a52a2a',
-    '#ff00ff'
-]
+class PhotoEditor extends PureComponent {
+  static propTypes = {
+    ...ViewPropTypes,
 
-export default function PhotoEditor(props) {
     const {
         colors = defaultColors,
         editedImageDirectory = null,
@@ -29,6 +18,7 @@ export default function PhotoEditor(props) {
         path = null,
         stickers = []
     } = props
+export default function PhotoEditor(props) {
     RNPhotoEditor.Edit(
         {
             colors,
