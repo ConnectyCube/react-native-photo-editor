@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -94,10 +95,12 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private int colorCodeTextView = 0;
     private PhotoEditorSDK photoEditorSDK;
     private int imageOrientation;
-    private ImageView backgroundImageView, doneDrawingImageView, eraseDrawingImageView;
+    private ImageView backgroundImageView,  eraseDrawingImageView, brushDrawingImageView;
+    private FloatingActionButton doneDrawingFloatingAB;
     private Bitmap backgroundBitMap;
     private int currentBackgroundColor = 0;
     private int colorPrimary = Color.parseColor("#017525");
+    private boolean brushWasAdded = false;
 
     // CROP OPTION
     private boolean cropperCircleOverlay = false;
@@ -159,8 +162,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 //        TextView saveTextTextView = (TextView) findViewById(R.id.save_text_tv);
         undoTextView = findViewById(R.id.undo_tv);
         undoTextTextView = findViewById(R.id.undo_text_tv);
-        doneDrawingImageView = findViewById(R.id.done_drawing_btn);
-        eraseDrawingImageView = findViewById(R.id.erase_drawing_tv);
+        doneDrawingFloatingAB = findViewById(R.id.done_drawing_btn);
+        eraseDrawingImageView = findViewById(R.id.erase_drawing_img);
+        brushDrawingImageView = findViewById(R.id.brush_drawing_img);
         clearAllTextView = findViewById(R.id.clear_all_tv);
         clearAllTextTextView = findViewById(R.id.clear_all_text_tv);
         TextView goToNextTextView = findViewById(R.id.go_to_next_screen_tv);
@@ -191,6 +195,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         clearAllTextView.setTypeface(newFont);
         goToNextTextView.setTypeface(newFont);
         deleteTextView.setTypeface(newFont);
+        doneDrawingFloatingAB.setBackgroundTintList(ColorStateList.valueOf(colorPrimary));
 
         final List<Fragment> fragmentsList = new ArrayList<>();
 
@@ -253,8 +258,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 //        saveTextTextView.setOnClickListener(this);
         undoTextView.setOnClickListener(this);
         undoTextTextView.setOnClickListener(this);
-        doneDrawingImageView.setOnClickListener(this);
+        doneDrawingFloatingAB.setOnClickListener(this);
         eraseDrawingImageView.setOnClickListener(this);
+        brushDrawingImageView.setOnClickListener(this);
         clearAllTextView.setOnClickListener(this);
         clearAllTextTextView.setOnClickListener(this);
         goToNextTextView.setOnClickListener(this);
@@ -365,6 +371,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
     private void clearAllViews() {
         photoEditorSDK.clearAllViews();
+        brushWasAdded = false;
         onRemoveViewListener(0);
     }
 
@@ -374,6 +381,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
     private void eraseDrawing() {
         photoEditorSDK.brushEraser();
+        toggleBrushModeIcons(false);
     }
 
     private void openAddTextPopupWindow(String text, final int colorCode) {
@@ -392,6 +400,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         pop.setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
         pop.setFocusable(true);
         pop.setBackgroundDrawable(null);
+        pop.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         final EditText addTextEditText = addTextPopupWindowRootView.findViewById(R.id.add_text_edit_text);
         if (stringIsNotEmpty(text)) {
@@ -509,19 +518,35 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         if (brushDrawingMode) {
             updateView(View.GONE);
             mainColorPicker.setVisibility(View.VISIBLE);
-            doneDrawingImageView.setVisibility(View.VISIBLE);
+            doneDrawingFloatingAB.show();
             eraseDrawingImageView.setVisibility(View.VISIBLE);
+            brushDrawingImageView.setVisibility(View.VISIBLE);
             mainColorPicker.setOnColorChangeListener(new VerticalSlideColorPicker.OnColorChangeListener() {
                 @Override
                 public void onColorChange(int selectedColor) {
                     photoEditorSDK.setBrushColor(selectedColor);
+                    toggleBrushModeIcons(true);
                 }
             });
         } else {
             updateView(View.VISIBLE);
             mainColorPicker.setVisibility(View.INVISIBLE);
-            doneDrawingImageView.setVisibility(View.GONE);
+            doneDrawingFloatingAB.hide();
             eraseDrawingImageView.setVisibility(View.GONE);
+            brushDrawingImageView.setVisibility(View.GONE);
+            mainColorPicker.setOnColorChangeListener(null);
+        }
+
+        toggleBrushModeIcons(brushDrawingMode);
+    }
+
+    private void toggleBrushModeIcons(boolean isBrushActive) {
+        if (isBrushActive){
+            brushDrawingImageView.setBackground(getResources().getDrawable(R.drawable.rounded_border));
+            eraseDrawingImageView.setBackground(null);
+        } else {
+            eraseDrawingImageView.setBackground(getResources().getDrawable(R.drawable.rounded_border));
+            brushDrawingImageView.setBackground(null);
         }
     }
 
@@ -695,7 +720,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         } else if (v.getId() == R.id.add_image_emoji_tv) {
             mLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         } else if(v.getId() == R.id.add_crop_tv) {
-            startCropping(undoTextView.getVisibility() == View.VISIBLE || undoTextTextView.getVisibility() == View.VISIBLE);
+            startCropping(clearAllTextView.getVisibility() == View.VISIBLE || clearAllTextTextView.getVisibility() == View.VISIBLE);
         } else if (v.getId() == R.id.add_text_tv) {
             openAddTextPopupWindow("", colorCodeTextView);
         } else if (v.getId() == R.id.add_pencil_tv) {
@@ -708,8 +733,11 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             clearAllViews();
         } else if (v.getId() == R.id.undo_text_tv || v.getId() == R.id.undo_tv) {
             undoViews();
-        } else if (v.getId() == R.id.erase_drawing_tv) {
+        } else if (v.getId() == R.id.erase_drawing_img) {
             eraseDrawing();
+        } else if (v.getId() == R.id.brush_drawing_img) {
+            photoEditorSDK.setBrushDrawingMode(true);
+            toggleBrushModeIcons(true);
         } else if (v.getId() == R.id.go_to_next_screen_tv) {
             returnBackWithSavedImage();
         } else if (v.getId() == R.id.change_background_btn) {
@@ -725,12 +753,13 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onAddViewListener(ViewType viewType, int numberOfAddedViews) {
         if (numberOfAddedViews > 0) {
-            clearAllTextView.setVisibility(View.VISIBLE);
-            clearAllTextTextView.setVisibility(View.VISIBLE);
             undoTextView.setVisibility(View.VISIBLE);
             undoTextTextView.setVisibility(View.VISIBLE);
-
         }
+
+        clearAllTextView.setVisibility(brushWasAdded || numberOfAddedViews > 0 ? View.VISIBLE : View.GONE);
+        clearAllTextTextView.setVisibility(brushWasAdded || numberOfAddedViews > 0 ? View.VISIBLE : View.GONE);
+
         switch (viewType) {
             case BRUSH_DRAWING:
                 Log.i("BRUSH_DRAWING", "onAddViewListener");
@@ -751,11 +780,12 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     public void onRemoveViewListener(int numberOfAddedViews) {
         Log.i(TAG, "onRemoveViewListener");
         if (numberOfAddedViews == 0) {
-            clearAllTextView.setVisibility(View.GONE);
-            clearAllTextTextView.setVisibility(View.GONE);
             undoTextView.setVisibility(View.GONE);
             undoTextTextView.setVisibility(View.GONE);
         }
+
+        clearAllTextView.setVisibility(!brushWasAdded && numberOfAddedViews == 0 ? View.GONE : View.VISIBLE);
+        clearAllTextTextView.setVisibility(!brushWasAdded && numberOfAddedViews == 0 ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -781,6 +811,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         switch (viewType) {
             case BRUSH_DRAWING:
                 Log.i("BRUSH_DRAWING", "onStopViewChangeListener");
+                brushWasAdded = true;
+                clearAllTextView.setVisibility(View.VISIBLE);
+                clearAllTextTextView.setVisibility(View.VISIBLE);
                 break;
             case EMOJI:
                 Log.i("EMOJI", "onStopViewChangeListener");
@@ -934,6 +967,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 if (resultUri != null) {
                     try {
                         photoEditorSDK.clearAllViews();
+                        brushWasAdded = false;
                         onRemoveViewListener(0);
                         parentImageRelativeLayout.destroyDrawingCache();
                         parentImageRelativeLayout.setDrawingCacheEnabled(false);
