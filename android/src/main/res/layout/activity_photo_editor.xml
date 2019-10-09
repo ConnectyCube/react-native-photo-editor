@@ -48,43 +48,53 @@
 
             </RelativeLayout>
 
-            <TextView
-                android:id="@+id/done_drawing_tv"
+            <ImageView
+                android:id="@+id/erase_drawing_img"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_toStartOf="@+id/brush_drawing_img"
+                android:layout_toLeftOf="@+id/brush_drawing_img"
+                android:background="@drawable/rounded_border"
+                android:src="@drawable/ic_eraser"
+                android:text="@string/erase"
+                android:textColor="#FFFFFF"
+                android:tint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/brush_drawing_img"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/rounded_border"
+                android:src="@drawable/ic_brush"
+                android:text="@string/erase"
+                android:textColor="#FFFFFF"
+                android:tint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/done_drawing_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="20dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="10dp"
-                android:padding="10dp"
-                android:shadowColor="#000000"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="2"
-                android:text="@string/done"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/save"
+                android:elevation="5dp"
+                android:src="@drawable/ic_check"
                 android:visibility="gone"
-                tools:visibility="visible"/>
-
-            <TextView
-                android:id="@+id/erase_drawing_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="10dp"
-                android:layout_toStartOf="@+id/done_drawing_tv"
-                android:padding="10dp"
-                android:shadowColor="#000000"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="2"
-                android:text="@string/erase"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:visibility="gone"
-                tools:visibility="visible"/>
+                tools:visibility="visible" />
 
             <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
                 android:id="@+id/main_color_picker"
@@ -157,11 +167,22 @@
                     android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/change_background_btn"
+                    android:id="@+id/add_crop_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toStartOf="@+id/add_image_emoji_tv"
                     android:layout_toLeftOf="@+id/add_image_emoji_tv"
+                    android:padding="15dp"
+                    android:text="@string/ic_crop"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/change_background_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@+id/add_crop_tv"
+                    android:layout_toLeftOf="@+id/add_crop_tv"
                     android:padding="15dp"
                     android:text="@string/ic_fill_color"
                     android:textColor="#FFFFFF"
@@ -229,7 +250,9 @@
                     android:gravity="center"
                     android:text="@string/ic_clear_all"
                     android:textColor="#FFFFFF"
-                    android:textSize="25sp" />
+                    android:textSize="25sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
                 <TextView
                     android:id="@+id/clear_all_text_tv"
@@ -244,7 +267,9 @@
                     android:layout_toRightOf="@+id/save_tv"
                     android:text="@string/clear_all"
                     android:textColor="#FFFFFF"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
                 <TextView
                     android:id="@+id/undo_tv"

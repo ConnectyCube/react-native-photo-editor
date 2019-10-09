@@ -1,6 +1,11 @@
 
 package ui.photoeditor;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
+import android.util.Log;
+
 import com.ahmedadeltito.photoeditor.PhotoEditorActivity;
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.BaseActivityEventListener;
@@ -11,28 +16,44 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Color;
-import android.util.Log;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
 
-  private static final int PHOTO_EDITOR_REQUEST = 1;
+  private class ResultCallbacks {
+      public Callback onDoneCallback;
+      public Callback onCancelCallback;
+
+      ResultCallbacks(Callback onDoneCallback,Callback onCancelCallback) {
+          this.onDoneCallback = onDoneCallback;
+          this.onCancelCallback = onCancelCallback;
+      }
+  }
+
+  private int PHOTO_EDITOR_REQUEST = 1;
   private static final String E_PHOTO_EDITOR_CANCELLED = "E_PHOTO_EDITOR_CANCELLED";
 
+  private HashMap<String, ResultCallbacks> requestCodeCallbacksMap = new HashMap<>();
 
-  private Callback mDoneCallback;
-  private Callback mCancelCallback;
+  private void addCallbacks(int requestCode, Callback onDoneCallback, Callback onCancelCallback) {
+      ResultCallbacks callbacks = new ResultCallbacks(onDoneCallback, onCancelCallback);
+      String key = String.valueOf(requestCode);
+      requestCodeCallbacksMap.put(key, callbacks);
+  }
+
+  private void removeCallbacks(String requestCodeKey) {
+      requestCodeCallbacksMap.remove(requestCodeKey);
+  }
 
   private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent intent) {
-      if (requestCode == PHOTO_EDITOR_REQUEST) {
-
+        String requestCodeKey = String.valueOf(requestCode);
+      if (requestCodeCallbacksMap.containsKey(requestCodeKey)) {
+        Callback mDoneCallback = requestCodeCallbacksMap.get(requestCodeKey).onDoneCallback;
+        Callback mCancelCallback = requestCodeCallbacksMap.get(requestCodeKey).onCancelCallback;
         if (mDoneCallback != null) {
 
           if (resultCode == Activity.RESULT_CANCELED) {
@@ -44,8 +65,7 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
           }
         }
 
-        mCancelCallback = null;
-        mDoneCallback = null;
+        removeCallbacks(requestCodeKey);
       }
     }
   };
@@ -106,8 +126,9 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
     intent.putExtra("hiddenControls", hiddenControlsIntent);
     intent.putExtra("stickers", stickersIntent);
 
-    mCancelCallback = onCancel;
-    mDoneCallback = onDone;
+    PHOTO_EDITOR_REQUEST = (char)(Math.abs(path.hashCode()) / 65535);
+
+    addCallbacks(PHOTO_EDITOR_REQUEST, onDone, onCancel);
 
     getCurrentActivity().startActivityForResult(intent, PHOTO_EDITOR_REQUEST);
   }
