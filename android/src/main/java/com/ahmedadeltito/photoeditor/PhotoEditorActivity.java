@@ -107,6 +107,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private boolean freeStyleCropEnabled = false;
     private boolean showCropGuidelines = true;
     private boolean hideBottomControls = false;
+    private boolean hideTextInput = false;
 
 
     @Override
@@ -322,11 +323,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             if (hiddenControls.get(i).toString().equalsIgnoreCase("sticker")) {
                 addImageEmojiTextView.setVisibility(View.INVISIBLE);
             }
-            if (hiddenControls.get(i).toString().equalsIgnoreCase("crop")) {
-                addCropTextView.setVisibility(View.INVISIBLE);
-            }
             if (hiddenControls.get(i).toString().equalsIgnoreCase("input")) {
                 messageTextInput.setVisibility(View.INVISIBLE);
+                hideTextInput = true;
             }
         }
     }
@@ -515,7 +514,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         topShadowRelativeLayout.setVisibility(visibility);
         bottomShadow.setVisibility(visibility);
         bottomShadowRelativeLayout.setVisibility(visibility);
-        messageTextInput.setVisibility(visibility);
+        if (!hideTextInput) {
+            messageTextInput.setVisibility(visibility);
+        }
     }
 
     private void updateBrushDrawingView(boolean brushDrawingMode) {
