@@ -21,6 +21,7 @@ import com.facebook.react.bridge.WritableMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
 
@@ -34,6 +35,8 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
       }
   }
 
+  private Random rand = new Random();
+  private final int MAX_REQUEST_CODE_VAL = 65535;
   private int PHOTO_EDITOR_REQUEST = 1;
   private static final String E_PHOTO_EDITOR_CANCELLED = "E_PHOTO_EDITOR_CANCELLED";
 
@@ -64,7 +67,7 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
           } else {
             Bundle resultIntentBundle = intent.getExtras();
             WritableMap result = Arguments.fromBundle(resultIntentBundle);
-            Log.d("RNPhotoEditorModule", "edited file path = " + resultIntentBundle);
+            Log.d("RNPhotoEditorModule", "result: " + resultIntentBundle);
             mDoneCallback.invoke(result);
           }
         }
@@ -130,7 +133,7 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
     intent.putExtra("hiddenControls", hiddenControlsIntent);
     intent.putExtra("stickers", stickersIntent);
 
-    PHOTO_EDITOR_REQUEST = (char)(Math.abs(path.hashCode()) / 65535);
+    PHOTO_EDITOR_REQUEST = rand.nextInt(MAX_REQUEST_CODE_VAL);
 
     addCallbacks(PHOTO_EDITOR_REQUEST, onDone, onCancel);
 

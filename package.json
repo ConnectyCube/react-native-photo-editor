@@ -1,26 +1,4 @@
 {
-  "_from": "github:banshiAnton/react-native-photo-editor#dev",
-  "_id": "react-native-photo-editor@1.0.0",
-  "_inBundle": false,
-  "_integrity": "",
-  "_location": "/react-native-photo-editor",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "git",
-    "raw": "react-native-photo-editor@github:banshiAnton/react-native-photo-editor#dev",
-    "name": "react-native-photo-editor",
-    "escapedName": "react-native-photo-editor",
-    "rawSpec": "github:banshiAnton/react-native-photo-editor#dev",
-    "saveSpec": "github:banshiAnton/react-native-photo-editor#dev",
-    "fetchSpec": null,
-    "gitCommittish": "dev"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "github:banshiAnton/react-native-photo-editor#08f4c75e26edd29fce6dd051256341b0b57c4318",
-  "_spec": "react-native-photo-editor@github:banshiAnton/react-native-photo-editor#dev",
-  "_where": "/Users/injoit/Documents/ConnectyCube-Messenger",
   "author": {
     "name": "Pranav Raj Singh Chauhan"
   },
