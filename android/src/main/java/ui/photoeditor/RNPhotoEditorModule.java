@@ -4,10 +4,12 @@ package ui.photoeditor;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.ahmedadeltito.photoeditor.PhotoEditorActivity;
 import com.facebook.react.bridge.ActivityEventListener;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -15,6 +17,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,9 +62,10 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
           if (resultCode == Activity.RESULT_CANCELED) {
             mCancelCallback.invoke(resultCode);
           } else {
-            String path = intent.getExtras().getString("imagePath");
-            Log.d("RNPhotoEditorModule", "edited file path = " + path);
-            mDoneCallback.invoke(path);
+            Bundle resultIntentBundle = intent.getExtras();
+            WritableMap result = Arguments.fromBundle(resultIntentBundle);
+            Log.d("RNPhotoEditorModule", "edited file path = " + resultIntentBundle);
+            mDoneCallback.invoke(result);
           }
         }
 

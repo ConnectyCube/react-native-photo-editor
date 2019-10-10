@@ -1,22 +1,51 @@
 {
+  "_from": "github:banshiAnton/react-native-photo-editor#dev",
+  "_id": "react-native-photo-editor@1.0.0",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/react-native-photo-editor",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "react-native-photo-editor@github:banshiAnton/react-native-photo-editor#dev",
     "name": "react-native-photo-editor",
-    "version": "1.0.0",
-    "description": "React Native: Native Photo Editor",
-    "main": "RNPhotoEditor.js",
-    "homepage": "https://github.com/prscX/react-native-photo-editor.git",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/prscX/react-native-photo-editor.git"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [
-        "react-native"
-    ],
-    "author": "Pranav Raj Singh Chauhan",
-    "devDependencies": {
-        "prettier-pack": "0.0.8"
-    },
-    "license": "Apache License 2.0"
+    "escapedName": "react-native-photo-editor",
+    "rawSpec": "github:banshiAnton/react-native-photo-editor#dev",
+    "saveSpec": "github:banshiAnton/react-native-photo-editor#dev",
+    "fetchSpec": null,
+    "gitCommittish": "dev"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "github:banshiAnton/react-native-photo-editor#08f4c75e26edd29fce6dd051256341b0b57c4318",
+  "_spec": "react-native-photo-editor@github:banshiAnton/react-native-photo-editor#dev",
+  "_where": "/Users/injoit/Documents/ConnectyCube-Messenger",
+  "author": {
+    "name": "Pranav Raj Singh Chauhan"
+  },
+  "bugs": {
+    "url": "https://github.com/prscX/react-native-photo-editor/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "React Native: Native Photo Editor",
+  "devDependencies": {
+    "prettier-pack": "0.0.8"
+  },
+  "homepage": "https://github.com/prscX/react-native-photo-editor.git",
+  "keywords": [
+    "react-native"
+  ],
+  "license": "Apache License 2.0",
+  "main": "RNPhotoEditor.js",
+  "name": "react-native-photo-editor",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prscX/react-native-photo-editor.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
 }

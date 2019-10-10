@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
     tools:context="com.ahmedadeltito.photoeditor.PhotoEditorActivity">
 
     <com.ahmedadeltito.photoeditor.widget.SlidingUpPanelLayout
@@ -25,8 +27,7 @@
             <RelativeLayout
                 android:id="@+id/parent_image_rl"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_centerInParent="true">
+                android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/photo_edit_iv"
@@ -41,8 +42,8 @@
                     android:id="@+id/drawing_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/photo_edit_iv"
                     android:layout_alignTop="@+id/photo_edit_iv"
+                    android:layout_alignBottom="@+id/photo_edit_iv"
                     android:layout_centerInParent="true"
                     android:visibility="gone" />
 
@@ -190,6 +191,23 @@
 
             </RelativeLayout>
 
+            <EditText
+                android:id="@+id/messageText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/bottom_shadow"
+                android:background="#40777171"
+                android:backgroundTint="#40777171"
+                android:hint="Type message..."
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="10dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#FFFFFF"
+                android:textSize="19sp" />
+
             <View
                 android:id="@+id/bottom_shadow"
                 android:layout_width="match_parent"
@@ -313,7 +331,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:text="@string/ic_continue"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#009419"
                     android:textSize="40sp" />
 
             </RelativeLayout>
