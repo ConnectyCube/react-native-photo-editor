@@ -85,7 +85,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private final String TAG = "PhotoEditorActivity";
     private RelativeLayout parentImageRelativeLayout;
     private VerticalSlideColorPicker mainColorPicker;
-    private TextView undoTextView, undoTextTextView, changeBackgroundTextView, clearAllTextView, clearAllTextTextView;
+    private TextView undoTextView, undoTextTextView, changeBackgroundTextView, clearAllTextView, clearAllTextTextView, messageTextInput;
     private SlidingUpPanelLayout mLayout;
     private View topShadow;
     private RelativeLayout topShadowRelativeLayout;
@@ -107,6 +107,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private boolean freeStyleCropEnabled = false;
     private boolean showCropGuidelines = true;
     private boolean hideBottomControls = false;
+    private boolean hideTextInput = false;
 
 
     @Override
@@ -167,6 +168,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         brushDrawingImageView = findViewById(R.id.brush_drawing_img);
         clearAllTextView = findViewById(R.id.clear_all_tv);
         clearAllTextTextView = findViewById(R.id.clear_all_text_tv);
+        messageTextInput = findViewById(R.id.messageText);
         TextView goToNextTextView = findViewById(R.id.go_to_next_screen_tv);
         backgroundImageView = findViewById(R.id.photo_edit_iv);
         mLayout = findViewById(R.id.sliding_layout);
@@ -321,8 +323,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             if (hiddenControls.get(i).toString().equalsIgnoreCase("sticker")) {
                 addImageEmojiTextView.setVisibility(View.INVISIBLE);
             }
-            if (hiddenControls.get(i).toString().equalsIgnoreCase("crop")) {
-                addCropTextView.setVisibility(View.INVISIBLE);
+            if (hiddenControls.get(i).toString().equalsIgnoreCase("input")) {
+                messageTextInput.setVisibility(View.INVISIBLE);
+                hideTextInput = true;
             }
         }
     }
@@ -511,6 +514,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         topShadowRelativeLayout.setVisibility(visibility);
         bottomShadow.setVisibility(visibility);
         bottomShadowRelativeLayout.setVisibility(visibility);
+        if (!hideTextInput) {
+            messageTextInput.setVisibility(visibility);
+        }
     }
 
     private void updateBrushDrawingView(boolean brushDrawingMode) {
@@ -570,6 +576,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
                     if (isSDCARDMounted()) {
                         String selectedOutputPath = getEditedFilePath();
+                        String imageMessageText = messageTextInput.getText().toString();
+                        returnIntent.putExtra("messageText", imageMessageText);
                         returnIntent.putExtra("imagePath", selectedOutputPath);
 
                         File file = new File(selectedOutputPath);
