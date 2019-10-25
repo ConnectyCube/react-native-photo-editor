@@ -299,7 +299,7 @@
                     android:background="#B5777171"
                     android:backgroundTint="#B5777171"
                     android:hint="Type message..."
-                    android:inputType="textMultiLine"
+                    android:inputType="text"
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp"
                     android:paddingRight="10dp"
