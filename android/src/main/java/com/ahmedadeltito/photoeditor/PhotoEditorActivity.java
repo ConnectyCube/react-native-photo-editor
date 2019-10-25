@@ -89,8 +89,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private SlidingUpPanelLayout mLayout;
     private View topShadow;
     private RelativeLayout topShadowRelativeLayout;
-    private View bottomShadow;
-    private RelativeLayout bottomShadowRelativeLayout;
+    private View bottomShadowRelativeLayout;
     private ArrayList<Integer> colorPickerColors;
     private int colorCodeTextView = 0;
     private PhotoEditorSDK photoEditorSDK;
@@ -174,7 +173,6 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         mLayout = findViewById(R.id.sliding_layout);
         topShadow = findViewById(R.id.top_shadow);
         topShadowRelativeLayout = findViewById(R.id.top_parent_rl);
-        bottomShadow = findViewById(R.id.bottom_shadow);
         bottomShadowRelativeLayout = findViewById(R.id.bottom_parent_rl);
 
         ViewPager pager = findViewById(R.id.image_emoji_view_pager);
@@ -512,7 +510,6 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private void updateView(int visibility) {
         topShadow.setVisibility(visibility);
         topShadowRelativeLayout.setVisibility(visibility);
-        bottomShadow.setVisibility(visibility);
         bottomShadowRelativeLayout.setVisibility(visibility);
         if (!hideTextInput) {
             messageTextInput.setVisibility(visibility);

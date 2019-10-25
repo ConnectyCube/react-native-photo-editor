@@ -4,8 +4,8 @@
     android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:descendantFocusability="beforeDescendants"
+    android:fitsSystemWindows="true"
     android:focusableInTouchMode="true"
     tools:context="com.ahmedadeltito.photoeditor.PhotoEditorActivity">
 
@@ -23,31 +23,6 @@
             android:layout_height="match_parent"
             android:background="#000000"
             android:gravity="center">
-
-            <RelativeLayout
-                android:id="@+id/parent_image_rl"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/photo_edit_iv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/app_name"
-                    android:scaleType="centerCrop" />
-
-                <com.ahmedadeltito.photoeditorsdk.BrushDrawingView
-                    android:id="@+id/drawing_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/photo_edit_iv"
-                    android:layout_alignBottom="@+id/photo_edit_iv"
-                    android:layout_centerInParent="true"
-                    android:visibility="gone" />
-
-            </RelativeLayout>
 
             <ImageView
                 android:id="@+id/erase_drawing_img"
@@ -83,47 +58,37 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/done_drawing_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true"
-                android:layout_margin="16dp"
-                android:contentDescription="@string/save"
-                android:elevation="5dp"
-                android:src="@drawable/ic_check"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
-                android:id="@+id/main_color_picker"
-                android:layout_width="24dp"
-                android:layout_height="260dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="20dp"
-                android:layout_marginRight="20dp"
-                app:borderColor="@android:color/transparent"
-                app:borderWidth="8dp"
-                android:visibility="invisible"
-                tools:visibility="visible"/>
-
-            <View
-                android:id="@+id/top_shadow"
+            <RelativeLayout
+                android:id="@+id/parent_image_rl"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_alignParentTop="true"
-                android:background="@drawable/fading_shadow" />
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/photo_edit_iv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/app_name"
+                    android:scaleType="centerCrop" />
+
+                <com.ahmedadeltito.photoeditorsdk.BrushDrawingView
+                    android:id="@+id/drawing_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/photo_edit_iv"
+                    android:layout_alignBottom="@+id/photo_edit_iv"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/top_parent_rl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/top_shadow"
                 android:layout_alignTop="@+id/top_shadow"
+                android:layout_alignBottom="@+id/top_shadow"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp">
 
@@ -138,12 +103,12 @@
 
                 <TextView
                     android:id="@+id/save_tv"
-                    android:layout_toEndOf="@+id/close_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/close_tv"
+                    android:paddingLeft="15dp"
                     android:paddingTop="15dp"
                     android:paddingRight="15dp"
-                    android:paddingLeft="15dp"
                     android:paddingBottom="7dp"
                     android:text="@string/ic_save"
                     android:textColor="#FFFFFF"
@@ -166,12 +131,12 @@
 
                 <TextView
                     android:id="@+id/clear_all_tv"
-                    android:layout_toEndOf="@+id/save_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/save_tv"
+                    android:paddingLeft="15dp"
                     android:paddingTop="15dp"
                     android:paddingRight="15dp"
-                    android:paddingLeft="15dp"
                     android:paddingBottom="7dp"
                     android:text="@string/ic_clear_all"
                     android:textColor="#FFFFFF"
@@ -194,12 +159,12 @@
 
                 <TextView
                     android:id="@+id/undo_tv"
-                    android:layout_toEndOf="@+id/clear_all_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/clear_all_tv"
+                    android:paddingLeft="15dp"
                     android:paddingTop="15dp"
                     android:paddingRight="15dp"
-                    android:paddingLeft="15dp"
                     android:paddingBottom="7dp"
                     android:text="@string/ic_clear_all"
                     android:textColor="#FFFFFF"
@@ -226,8 +191,8 @@
                     android:id="@+id/add_text_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
                     android:padding="15dp"
                     android:text="@string/ic_text"
                     android:textColor="#FFFFFF"
@@ -277,79 +242,120 @@
 
             </RelativeLayout>
 
-            <View
-                android:id="@+id/bottom_shadow"
-                android:layout_width="match_parent"
-                android:layout_height="90dp"
-                android:layout_alignParentBottom="true"/>
-
             <RelativeLayout
                 android:id="@+id/bottom_parent_rl"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignTop="@+id/bottom_shadow"
-                android:layout_alignBottom="@+id/bottom_shadow">
-
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true">
 
                 <EditText
                     android:id="@+id/messageText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:background="#B5777171"
-                    android:backgroundTint="#B5777171"
+                    android:background="#363A36"
+                    android:backgroundTint="#363A36"
                     android:hint="Type message..."
-                    android:inputType="text"
+                    android:inputType="textMultiLine"
+                    android:maxLines="6"
+                    android:paddingStart="20dp"
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp"
-                    android:paddingRight="10dp"
+                    android:paddingEnd="84dp"
+                    android:paddingRight="84dp"
                     android:paddingBottom="10dp"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#FFFFFF"
                     android:textSize="19sp" />
 
+                <RelativeLayout
+                    android:id="@+id/delete_rl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@+id/messageText"
+                    android:layout_marginBottom="8dp"
+                    android:paddingLeft="15dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/delete_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/rounded_border_text_view"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="@string/ic_delete"
+                        android:textColor="#FFFFFF"
+                        android:textSize="30sp" />
+
+                </RelativeLayout>
+
                 <TextView
                     android:id="@+id/go_to_next_screen_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_alignTop="@+id/messageText"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
+                    android:layout_marginTop="-30dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginBottom="-30dp"
+                    android:gravity="center"
                     android:text="@string/ic_continue"
                     android:textColor="#009419"
-                    android:padding="15dp"
                     android:textSize="52sp" />
 
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/delete_rl"
+            <View
+                android:id="@+id/top_shadow"
                 android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/fading_shadow" />
+
+            <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
+                android:id="@+id/main_color_picker"
+                android:layout_width="24dp"
+                android:layout_height="260dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:layout_marginRight="20dp"
+                android:visibility="invisible"
+                app:borderColor="@android:color/transparent"
+                app:borderWidth="8dp"
+                tools:visibility="visible" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/done_drawing_btn"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/bottom_parent_rl"
-                android:layout_marginBottom="-30dp"
-                android:paddingLeft="15dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/delete_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:background="@drawable/rounded_border_text_view"
-                    android:padding="10dp"
-                    android:text="@string/ic_delete"
-                    android:textColor="#FFFFFF"
-                    android:textSize="30sp" />
-
-            </RelativeLayout>
-
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/save"
+                android:elevation="5dp"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                tools:visibility="gone" />
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/image_emoji_bottom_sheet"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/image_emoji_view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/image_emoji_indicator" />
 
             <com.ahmedadeltito.photoeditor.widget.RealtimeBlurView
                 android:layout_width="match_parent"
@@ -366,12 +372,6 @@
                 android:padding="12dp"
                 app:fillColor="#999999"
                 app:pageColor="#e7e7e7" />
-
-            <androidx.viewpager.widget.ViewPager
-                android:id="@+id/image_emoji_view_pager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/image_emoji_indicator" />
 
         </RelativeLayout>
 
