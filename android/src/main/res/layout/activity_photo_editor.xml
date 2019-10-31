@@ -24,6 +24,38 @@
             android:background="#000000"
             android:gravity="center">
 
+            <RelativeLayout
+                android:id="@+id/parent_image_rl"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/photo_edit_iv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/app_name"
+                    android:scaleType="centerCrop" />
+
+                <com.ahmedadeltito.photoeditorsdk.BrushDrawingView
+                    android:id="@+id/drawing_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/photo_edit_iv"
+                    android:layout_alignBottom="@+id/photo_edit_iv"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/top_shadow"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/fading_shadow" />
+
             <ImageView
                 android:id="@+id/erase_drawing_img"
                 android:layout_width="32dp"
@@ -57,31 +89,6 @@
                 android:tint="@color/white"
                 android:visibility="gone"
                 tools:visibility="visible" />
-
-            <RelativeLayout
-                android:id="@+id/parent_image_rl"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/photo_edit_iv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/app_name"
-                    android:scaleType="centerCrop" />
-
-                <com.ahmedadeltito.photoeditorsdk.BrushDrawingView
-                    android:id="@+id/drawing_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/photo_edit_iv"
-                    android:layout_alignBottom="@+id/photo_edit_iv"
-                    android:layout_centerInParent="true"
-                    android:visibility="gone" />
-
-            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/top_parent_rl"
@@ -124,64 +131,6 @@
                     android:layout_alignParentStart="true"
                     android:layout_alignParentLeft="true"
                     android:text="@string/save"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/clear_all_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@+id/save_tv"
-                    android:paddingLeft="15dp"
-                    android:paddingTop="15dp"
-                    android:paddingRight="15dp"
-                    android:paddingBottom="7dp"
-                    android:text="@string/ic_clear_all"
-                    android:textColor="#FFFFFF"
-                    android:textSize="25sp"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/clear_all_text_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/clear_all_tv"
-                    android:layout_toEndOf="@+id/save_tv"
-                    android:layout_toRightOf="@+id/save_tv"
-                    android:text="@string/clear_all"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/undo_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@+id/clear_all_tv"
-                    android:paddingLeft="15dp"
-                    android:paddingTop="15dp"
-                    android:paddingRight="15dp"
-                    android:paddingBottom="7dp"
-                    android:text="@string/ic_clear_all"
-                    android:textColor="#FFFFFF"
-                    android:textSize="25sp"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/undo_text_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/clear_all_tv"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toEndOf="@+id/clear_all_tv"
-                    android:layout_toRightOf="@+id/clear_all_tv"
-                    android:text="@string/undo"
                     android:textColor="#FFFFFF"
                     android:textSize="15sp"
                     android:visibility="gone"
@@ -242,19 +191,77 @@
 
             </RelativeLayout>
 
+            <LinearLayout
+                android:id="@+id/undo_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/top_parent_rl"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/clear_all_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="15dp"
+                    android:paddingTop="15dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="7dp"
+                    android:text="@string/ic_clear_all"
+                    android:textColor="#FFFFFF"
+                    android:textSize="25sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/clear_all_text_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/clear_all"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/undo_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="15dp"
+                    android:paddingTop="15dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="7dp"
+                    android:text="@string/ic_clear_all"
+                    android:textColor="#FFFFFF"
+                    android:textSize="25sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/undo_text_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/undo"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
             <RelativeLayout
                 android:id="@+id/bottom_parent_rl"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true">
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                android:gravity="bottom">
 
                 <EditText
                     android:id="@+id/messageText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:background="#363A36"
-                    android:backgroundTint="#363A36"
+                    android:background="#C8000000"
+                    android:backgroundTint="#C8000000"
                     android:hint="Type message..."
                     android:inputType="textMultiLine"
                     android:maxLines="6"
@@ -292,30 +299,21 @@
 
                 </RelativeLayout>
 
-                <TextView
-                    android:id="@+id/go_to_next_screen_tv"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/go_to_next_screen_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignTop="@+id/messageText"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
-                    android:layout_marginTop="-30dp"
+                    android:layout_marginTop="-26dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginRight="15dp"
-                    android:layout_marginBottom="-30dp"
-                    android:gravity="center"
-                    android:text="@string/ic_continue"
-                    android:textColor="#009419"
-                    android:textSize="52sp" />
+                    android:elevation="5dp"
+                    android:src="@drawable/ic_arrow_right"
+                    tools:visibility="visible"/>
 
             </RelativeLayout>
-
-            <View
-                android:id="@+id/top_shadow"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_alignParentTop="true"
-                android:background="@drawable/fading_shadow" />
 
             <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
                 android:id="@+id/main_color_picker"
@@ -351,17 +349,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.viewpager.widget.ViewPager
-                android:id="@+id/image_emoji_view_pager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/image_emoji_indicator" />
-
             <com.ahmedadeltito.photoeditor.widget.RealtimeBlurView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:realtimeBlurRadius="10dp"
                 app:realtimeOverlayColor="#33ffffff" />
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/image_emoji_view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/image_emoji_indicator" />
 
             <com.viewpagerindicator.CirclePageIndicator
                 android:id="@+id/image_emoji_indicator"

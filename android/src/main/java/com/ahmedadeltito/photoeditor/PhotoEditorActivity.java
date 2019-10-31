@@ -3,6 +3,7 @@ package com.ahmedadeltito.photoeditor;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.MediaRouteButton;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -89,6 +90,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private SlidingUpPanelLayout mLayout;
     private View topShadow;
     private RelativeLayout topShadowRelativeLayout;
+    private View undoLayout;
     private View bottomShadowRelativeLayout;
     private ArrayList<Integer> colorPickerColors;
     private int colorCodeTextView = 0;
@@ -168,11 +170,12 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         clearAllTextView = findViewById(R.id.clear_all_tv);
         clearAllTextTextView = findViewById(R.id.clear_all_text_tv);
         messageTextInput = findViewById(R.id.messageText);
-        TextView goToNextTextView = findViewById(R.id.go_to_next_screen_tv);
+        FloatingActionButton goToNextFAB = findViewById(R.id.go_to_next_screen_btn);
         backgroundImageView = findViewById(R.id.photo_edit_iv);
         mLayout = findViewById(R.id.sliding_layout);
         topShadow = findViewById(R.id.top_shadow);
         topShadowRelativeLayout = findViewById(R.id.top_parent_rl);
+        undoLayout = findViewById(R.id.undo_layout);
         bottomShadowRelativeLayout = findViewById(R.id.bottom_parent_rl);
 
         ViewPager pager = findViewById(R.id.image_emoji_view_pager);
@@ -193,9 +196,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 //        saveTextView.setTypeface(newFont);
         undoTextView.setTypeface(newFont);
         clearAllTextView.setTypeface(newFont);
-        goToNextTextView.setTypeface(newFont);
         deleteTextView.setTypeface(newFont);
         doneDrawingFloatingAB.setBackgroundTintList(ColorStateList.valueOf(colorPrimary));
+        goToNextFAB.setBackgroundTintList(ColorStateList.valueOf(colorPrimary));
 
         final List<Fragment> fragmentsList = new ArrayList<>();
 
@@ -263,7 +266,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         brushDrawingImageView.setOnClickListener(this);
         clearAllTextView.setOnClickListener(this);
         clearAllTextTextView.setOnClickListener(this);
-        goToNextTextView.setOnClickListener(this);
+        goToNextFAB.setOnClickListener(this);
 
         ArrayList<Integer> intentColors = (ArrayList<Integer>) getIntent().getExtras().getSerializable("colorPickerColors");
 
@@ -510,6 +513,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private void updateView(int visibility) {
         topShadow.setVisibility(visibility);
         topShadowRelativeLayout.setVisibility(visibility);
+        undoLayout.setVisibility(visibility);
         bottomShadowRelativeLayout.setVisibility(visibility);
         if (!hideTextInput) {
             messageTextInput.setVisibility(visibility);
@@ -743,7 +747,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         } else if (v.getId() == R.id.brush_drawing_img) {
             photoEditorSDK.setBrushDrawingMode(true);
             toggleBrushModeIcons(true);
-        } else if (v.getId() == R.id.go_to_next_screen_tv) {
+        } else if (v.getId() == R.id.go_to_next_screen_btn) {
             returnBackWithSavedImage();
         } else if (v.getId() == R.id.change_background_btn) {
             openChangeBackgroundColorPopupWindow();
