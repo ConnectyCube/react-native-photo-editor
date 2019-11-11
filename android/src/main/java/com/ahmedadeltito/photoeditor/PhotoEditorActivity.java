@@ -143,6 +143,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 imageOrientation = ExifInterface.ORIENTATION_NORMAL;
                 e.printStackTrace();
             }
+
+            Log.w(TAG, "Income to Editor image size: width = " + options.outWidth + " height = " + options.outHeight);
         }
 
         Typeface newFont = getFontFromRes(R.raw.eventtusicons);

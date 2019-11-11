@@ -3,6 +3,7 @@ package ui.photoeditor;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -69,6 +71,13 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
             WritableMap result = Arguments.fromBundle(resultIntentBundle);
             Log.d("RNPhotoEditorModule", "result: " + resultIntentBundle);
             mDoneCallback.invoke(result);
+
+            String path = resultIntentBundle.getString("imagePath");
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(new File(path).getAbsolutePath(), options);
+
+            Log.d("RNPhotoEditorModule", "result image size : width = " + options.outWidth + " height = " + options.outHeight);
           }
         }
 
