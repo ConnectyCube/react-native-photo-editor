@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		40137CF49C59930DA23C79A9 /* Pods_RNPhotoEditor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96DD4AC0F5A94CE9A56A7D23 /* Pods_RNPhotoEditor.framework */; };
+		8662005823799F16009069DD /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8662005723799F16009069DD /* Index.swift */; };
 		B3E7B58A1CC2AC0600A0062D /* RNPhotoEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNPhotoEditor.m */; };
 		CEA2B04A2144EDA200D21235 /* iOSPhotoEditor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEA2B0472144EDA000D21235 /* iOSPhotoEditor.framework */; };
 /* End PBXBuildFile section */
@@ -45,6 +46,8 @@
 		05DA841703B4CCFEE54B14CD /* Pods-RNPhotoEditor.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNPhotoEditor.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RNPhotoEditor/Pods-RNPhotoEditor.debug.xcconfig"; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libRNPhotoEditor.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNPhotoEditor.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4715A5625794BA3A83A872C5 /* Pods-RNPhotoEditor.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNPhotoEditor.release.xcconfig"; path = "Pods/Target Support Files/Pods-RNPhotoEditor/Pods-RNPhotoEditor.release.xcconfig"; sourceTree = "<group>"; };
+		8662005323799BE8009069DD /* RNPhotoEditor-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNPhotoEditor-Bridging-Header.h"; sourceTree = "<group>"; };
+		8662005723799F16009069DD /* Index.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Index.swift; sourceTree = "<group>"; };
 		96DD4AC0F5A94CE9A56A7D23 /* Pods_RNPhotoEditor.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RNPhotoEditor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5881CC2AC0600A0062D /* RNPhotoEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNPhotoEditor.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RNPhotoEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNPhotoEditor.m; sourceTree = "<group>"; };
@@ -75,11 +78,13 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				8662005723799F16009069DD /* Index.swift */,
 				B3E7B5881CC2AC0600A0062D /* RNPhotoEditor.h */,
 				B3E7B5891CC2AC0600A0062D /* RNPhotoEditor.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				E6FAD135F551FA36DB423079 /* Pods */,
 				956042663EE01F6152091375 /* Frameworks */,
+				8662005323799BE8009069DD /* RNPhotoEditor-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -142,6 +147,7 @@
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
+						LastSwiftMigration = 1120;
 					};
 				};
 			};
@@ -150,6 +156,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
@@ -211,6 +218,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8662005823799F16009069DD /* Index.swift in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RNPhotoEditor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -238,6 +246,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEFINES_MODULE = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -258,6 +267,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_MODULE_NAME = RNPhotoEditor;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -282,6 +292,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
+				DEFINES_MODULE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -294,6 +305,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_MODULE_NAME = RNPhotoEditor;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -303,16 +315,20 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 05DA841703B4CCFEE54B14CD /* Pods-RNPhotoEditor.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNPhotoEditor;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "RNPhotoEditor-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
@@ -321,16 +337,19 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4715A5625794BA3A83A872C5 /* Pods-RNPhotoEditor.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNPhotoEditor;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "RNPhotoEditor-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
