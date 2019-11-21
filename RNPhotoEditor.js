@@ -24,16 +24,20 @@ export default function PhotoEditor(props) {
         editedImageDirectory = null,
         colorPrimary = null,
         hiddenControls = [],
+        defaultBackgroundColor = '',
         onCancel = () => {},
         onDone = () => {},
         path = null,
+        focusOnText = false,
         stickers = []
     } = props
     RNPhotoEditor.Edit(
         {
             colors,
+            defaultBackgroundColor,
             hiddenControls,
             onCancel,
+            focusOnText,
             editedImageDirectory,
             colorPrimary,
             onDone,

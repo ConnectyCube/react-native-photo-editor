@@ -104,6 +104,7 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
   public void Edit(final ReadableMap props, final Callback onDone, final Callback onCancel) {
     Log.d("RNPhotoEditorModule", props.toString());
     String path = props.getString("path");
+    String defaultBackgroundColor = props.getString("defaultBackgroundColor");
     String targetImageDirectoryName = props.getString("editedImageDirectory");
     String colorPrimary = props.getString("colorPrimary");
 
@@ -138,9 +139,11 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
     intent.putExtra("selectedImagePath", path);
     intent.putExtra("editedImageDirectory", targetImageDirectoryName);
     intent.putExtra("colorPrimary", colorPrimary);
+    intent.putExtra("defaultBackgroundColor", defaultBackgroundColor);
     intent.putExtra("colorPickerColors", colorPickerColors);
     intent.putExtra("hiddenControls", hiddenControlsIntent);
     intent.putExtra("stickers", stickersIntent);
+    intent.putExtra("focusOnText", props.getBoolean("focusOnText"));
 
     PHOTO_EDITOR_REQUEST = rand.nextInt(MAX_REQUEST_CODE_VAL);
 

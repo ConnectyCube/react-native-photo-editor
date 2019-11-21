@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -28,6 +29,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -68,6 +71,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
@@ -93,15 +97,18 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private View undoLayout;
     private View bottomShadowRelativeLayout;
     private ArrayList<Integer> colorPickerColors;
-    private int colorCodeTextView = 0;
+    private int colorCodeTextView = -259; // white color   ;
     private PhotoEditorSDK photoEditorSDK;
     private int imageOrientation;
     private ImageView backgroundImageView,  eraseDrawingImageView, brushDrawingImageView;
+    private int currentBgColorIndex = 0;
     private FloatingActionButton doneDrawingFloatingAB;
     private Bitmap backgroundBitMap;
     private int currentBackgroundColor = 0;
     private int colorPrimary = Color.parseColor("#017525");
+    private String defaultBackgroundColor = null;
     private boolean brushWasAdded = false;
+    private boolean focusOnText = false;
 
     // CROP OPTION
     private boolean cropperCircleOverlay = false;
@@ -119,13 +126,46 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         initPrimaryColor();
 
         String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
+        focusOnText = getIntent().getExtras().getBoolean("focusOnText", false);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
 
         if (TextUtils.isEmpty(selectedImagePath)) {
+
+            ArrayList<Integer> intentColors = (ArrayList<Integer>) getIntent().getExtras().getSerializable("colorPickerColors");
+
+            colorPickerColors = new ArrayList<>();
+            if (intentColors != null) {
+                colorPickerColors = intentColors;
+            } else {
+                colorPickerColors.add(getResources().getColor(R.color.black));
+                colorPickerColors.add(getResources().getColor(R.color.brown_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.red_orange_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.orange_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.yellow_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.yellow_green_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.green_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.sky_blue_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.blue_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.violet_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.red_color_picker));
+                colorPickerColors.add(getResources().getColor(R.color.white));
+            }
+
+            Log.d(TAG, "colors = " + colorPickerColors);
+
+            defaultBackgroundColor = getIntent().getExtras().getString("defaultBackgroundColor");
+            if (!TextUtils.isEmpty(defaultBackgroundColor)) {
+                currentBackgroundColor = Color.parseColor(defaultBackgroundColor);
+            } else {
+                Random randomColor = new Random();
+                currentBgColorIndex = randomColor.nextInt(colorPickerColors.size());
+                currentBackgroundColor = colorPickerColors.get(currentBgColorIndex);
+            }
+
             backgroundBitMap = Bitmap.createBitmap(DeviceUtils.getDeviceWidth(this), DeviceUtils.getDeviceHeight(this), Bitmap.Config.RGB_565);
-            currentBackgroundColor = getResources().getColor(R.color.initial);
+            Log.d(TAG, "bg color = " + currentBackgroundColor);
             imageOrientation = ExifInterface.ORIENTATION_NORMAL;
             backgroundBitMap.eraseColor(currentBackgroundColor);
         } else {
@@ -179,6 +219,10 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         topShadowRelativeLayout = findViewById(R.id.top_parent_rl);
         undoLayout = findViewById(R.id.undo_layout);
         bottomShadowRelativeLayout = findViewById(R.id.bottom_parent_rl);
+
+        messageTextInput.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(messageTextInput, InputMethodManager.SHOW_IMPLICIT);
 
         ViewPager pager = findViewById(R.id.image_emoji_view_pager);
         PageIndicator indicator = findViewById(R.id.image_emoji_indicator);
@@ -270,26 +314,6 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         clearAllTextTextView.setOnClickListener(this);
         goToNextFAB.setOnClickListener(this);
 
-        ArrayList<Integer> intentColors = (ArrayList<Integer>) getIntent().getExtras().getSerializable("colorPickerColors");
-
-        colorPickerColors = new ArrayList<>();
-        if (intentColors != null) {
-            colorPickerColors = intentColors;
-        } else {
-            colorPickerColors.add(getResources().getColor(R.color.black));
-            colorPickerColors.add(getResources().getColor(R.color.brown_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.red_orange_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.orange_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.yellow_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.yellow_green_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.green_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.sky_blue_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.blue_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.violet_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.red_color_picker));
-            colorPickerColors.add(getResources().getColor(R.color.white));
-        }
-
         new CountDownTimer(500, 100) {
 
             public void onTick(long millisUntilFinished) {
@@ -331,6 +355,16 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 hideTextInput = true;
             }
         }
+
+        Log.d(TAG, "focusOnText: = " + focusOnText);
+        if (focusOnText) {
+            goToNextFAB.post(new Runnable() {
+                @Override
+                public void run() {
+                    openAddTextPopupWindow("", colorCodeTextView);
+                }
+            });
+        }
     }
 
     private void initPrimaryColor() {
@@ -344,6 +378,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             }
         }
     }
+
 
     private boolean stringIsNotEmpty(String string) {
         if (string != null && !string.equals("null")) {
@@ -458,58 +493,16 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         pop.showAtLocation(addTextPopupWindowRootView, Gravity.TOP, 0, 0);
     }
 
-    private void openChangeBackgroundColorPopupWindow() {
-        final int[] tempColor = new int[1];
-        tempColor[0] = currentBackgroundColor;
+    private int getNextBackgroundColor() {
+        if (++currentBgColorIndex > (colorPickerColors.size() - 1)) {
+            currentBgColorIndex = 0;
+        }
+        return colorPickerColors.get(currentBgColorIndex);
+    }
 
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View changeBackgroundPopupWindowRootView = inflater.inflate(R.layout.change_background_color_popup_window, null);
-
-        final PopupWindow pop = new PopupWindow(PhotoEditorActivity.this);
-        pop.setContentView(changeBackgroundPopupWindowRootView);
-        pop.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
-        pop.setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
-        pop.setFocusable(true);
-        pop.setBackgroundDrawable(null);
-        pop.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                changeBackgroundColor(currentBackgroundColor);
-                updateView(View.VISIBLE);
-            }
-        });
-
-        FloatingActionButton saveBackgroundBtn = changeBackgroundPopupWindowRootView.findViewById(R.id.save_background_color_btn);
-        saveBackgroundBtn.setBackgroundTintList(ColorStateList.valueOf(colorPrimary));
-        saveBackgroundBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                currentBackgroundColor = tempColor[0];
-                pop.dismiss();
-            }
-        });
-
-        VerticalSlideColorPicker colorPicker = changeBackgroundPopupWindowRootView.findViewById(R.id.color_picker_vertical);
-        colorPicker.setOnColorChangeListener(new VerticalSlideColorPicker.OnColorChangeListener() {
-            @Override
-            public void onColorChange(int selectedColor) {
-                tempColor[0] = selectedColor;
-                changeBackgroundColor(selectedColor);
-            }
-        });
-        colorPicker.setStartColor(tempColor[0]);
-        colorPicker.setColorPrimary(colorPrimary);
-
-        ImageView backBtn = changeBackgroundPopupWindowRootView.findViewById(R.id.back_btn);
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pop.dismiss();
-            }
-        });
-
-        updateView(View.GONE);
-        pop.showAtLocation(changeBackgroundPopupWindowRootView, Gravity.TOP, 0, 0);
+    private void onChangeBackgroundColor() {
+        currentBackgroundColor = getNextBackgroundColor();
+        changeBackgroundColor(currentBackgroundColor);
     }
 
     private void updateView(int visibility) {
@@ -752,7 +745,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         } else if (v.getId() == R.id.go_to_next_screen_btn) {
             returnBackWithSavedImage();
         } else if (v.getId() == R.id.change_background_btn) {
-            openChangeBackgroundColorPopupWindow();
+            onChangeBackgroundColor();
         }
     }
 
