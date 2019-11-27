@@ -45,6 +45,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.PermissionChecker;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -53,10 +54,10 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.ahmedadeltito.photoeditor.widget.SlidingUpPanelLayout;
 import com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker;
-import com.ahmedadeltito.photoeditorsdk.BrushDrawingView;
-import com.ahmedadeltito.photoeditorsdk.OnPhotoEditorSDKListener;
-import com.ahmedadeltito.photoeditorsdk.PhotoEditorSDK;
-import com.ahmedadeltito.photoeditorsdk.ViewType;
+import com.ahmedadeltito.photoeditor.photoeditorsdk.BrushDrawingView;
+import com.ahmedadeltito.photoeditor.photoeditorsdk.OnPhotoEditorSDKListener;
+import com.ahmedadeltito.photoeditor.photoeditorsdk.PhotoEditorSDK;
+import com.ahmedadeltito.photoeditor.photoeditorsdk.ViewType;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.viewpagerindicator.PageIndicator;
 import com.yalantis.ucrop.UCrop;
@@ -69,6 +70,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -81,8 +83,10 @@ import static android.view.inputmethod.InputMethodManager.SHOW_FORCED;
 import static android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT;
 
 public class PhotoEditorActivity extends AppCompatActivity implements View.OnClickListener, OnPhotoEditorSDKListener {
-
     public static Typeface emojiFont = null;
+
+    private ArrayList<Typeface> typeFaces = null;
+    private int currentTypeFaceIndex = 0;
 
     protected static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_GALLERY = 0x1;
     final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
@@ -122,7 +126,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_editor);
-
+        loadFonts();
         initPrimaryColor();
 
         String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
@@ -233,7 +237,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         mainColorPicker.setStartColor(Color.BLACK);
 
         closeTextView.setTypeface(newFont);
-        addTextView.setTypeface(newFont);
+//        addTextView.setTypeface(newFont);
         addPencil.setTypeface(newFont);
         changeBackgroundTextView.setTypeface(newFont);
         changeBackgroundTextView.setVisibility(currentBackgroundColor == 0 ? View.GONE : View.VISIBLE);
@@ -335,7 +339,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 clearAllTextTextView.setVisibility(View.INVISIBLE);
             }
             if (hiddenControls.get(i).toString().equalsIgnoreCase("crop")) {
-                addCropTextView.setVisibility(View.INVISIBLE);
+                addCropTextView.setVisibility(View.GONE);
             }
             if (hiddenControls.get(i).toString().equalsIgnoreCase("draw")) {
                 addPencil.setVisibility(View.INVISIBLE);
@@ -361,10 +365,20 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             goToNextFAB.post(new Runnable() {
                 @Override
                 public void run() {
-                    openAddTextPopupWindow("", colorCodeTextView);
+                    openAddTextPopupWindow("", colorCodeTextView, typeFaces.get(currentTypeFaceIndex));
                 }
             });
         }
+    }
+
+    private void loadFonts() {
+        typeFaces = new ArrayList<>(Arrays.asList(
+                ResourcesCompat.getFont(this, R.font.roboto_medium),
+                ResourcesCompat.getFont(this, R.font.amiri),
+                ResourcesCompat.getFont(this, R.font.finger_paint),
+                ResourcesCompat.getFont(this, R.font.great_vibes),
+                ResourcesCompat.getFont(this, R.font.passion_one)
+        ));
     }
 
     private void initPrimaryColor() {
@@ -401,8 +415,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
-    private void addText(String text, int colorCodeTextView) {
-        photoEditorSDK.addText(text, colorCodeTextView);
+    private void addText(String text, int colorCodeTextView, Typeface textTypeFace) {
+        photoEditorSDK.addText(text, colorCodeTextView, textTypeFace);
     }
 
     private void changeBackgroundColor(int colorCode) {
@@ -425,7 +439,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         toggleBrushModeIcons(false);
     }
 
-    private void openAddTextPopupWindow(String text, final int colorCode) {
+    private void openAddTextPopupWindow(String text, final int colorCode, Typeface textTypeFace) {
         final int[] tempColor = new int[1];
         tempColor[0] = colorCode;
 
@@ -443,13 +457,25 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         pop.setBackgroundDrawable(null);
         pop.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
+        final TextView changeTextStyle = addTextPopupWindowRootView.findViewById(R.id.change_text_style);
+
         final EditText addTextEditText = addTextPopupWindowRootView.findViewById(R.id.add_text_edit_text);
         if (stringIsNotEmpty(text)) {
+            addTextEditText.setTypeface(textTypeFace);
             addTextEditText.setText(text);
             addTextEditText.setTextColor(colorCode == 0 ? getResources().getColor(R.color.white) : colorCode);
         }
 
         addTextEditText.requestFocus();
+
+
+        changeTextStyle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Typeface nextTextTypeFace = getNextTypeFace();
+                addTextEditText.setTypeface(nextTextTypeFace);
+            }
+        });
 
         FloatingActionButton saveTextBtn = addTextPopupWindowRootView.findViewById(R.id.save_text_btn);
         saveTextBtn.setBackgroundTintList(ColorStateList.valueOf(colorPrimary));
@@ -457,7 +483,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onClick(View view) {
                 colorCodeTextView = tempColor[0];
-                addText(addTextEditText.getText().toString(), colorCodeTextView);
+                addText(addTextEditText.getText().toString(), colorCodeTextView, addTextEditText.getTypeface());
                 pop.dismiss();
             }
         });
@@ -491,6 +517,13 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
         updateView(View.GONE);
         pop.showAtLocation(addTextPopupWindowRootView, Gravity.TOP, 0, 0);
+    }
+
+    private Typeface getNextTypeFace() {
+        if (++currentTypeFaceIndex > (typeFaces.size() - 1)) {
+            currentTypeFaceIndex = 0;
+        }
+        return typeFaces.get(currentTypeFaceIndex);
     }
 
     private int getNextBackgroundColor() {
@@ -726,7 +759,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         } else if(v.getId() == R.id.add_crop_tv) {
             startCropping(clearAllTextView.getVisibility() == View.VISIBLE || clearAllTextTextView.getVisibility() == View.VISIBLE);
         } else if (v.getId() == R.id.add_text_tv) {
-            openAddTextPopupWindow("", colorCodeTextView);
+            currentTypeFaceIndex = 0;
+            openAddTextPopupWindow("", colorCodeTextView, typeFaces.get(currentTypeFaceIndex));
         } else if (v.getId() == R.id.add_pencil_tv) {
             updateBrushDrawingView(true);
         } else if (v.getId() == R.id.done_drawing_btn) {
@@ -750,8 +784,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
-    public void onEditTextChangeListener(String text, int colorCode) {
-        openAddTextPopupWindow(text, colorCode);
+    public void onEditTextChangeListener(String text, int colorCode, Typeface textTypeFace) {
+        openAddTextPopupWindow(text, colorCode, textTypeFace);
     }
 
     @Override

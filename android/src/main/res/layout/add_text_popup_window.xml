@@ -10,11 +10,10 @@
         style="@style/EditText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/save_text_btn"
-        android:layout_marginBottom="15dp"
         android:background="@null"
         android:focusable="true"
         android:focusableInTouchMode="true"
+        android:fontFamily="@font/roboto_medium"
         android:gravity="center"
         android:hint="Type status..."
         android:inputType="textMultiLine"
@@ -38,6 +37,21 @@
             android:background="?actionBarItemBackground"
             android:src="@drawable/ic_arrow_left"
             android:text="@string/undo" />
+
+        <TextView
+            android:layout_weight="1"
+            android:id="@+id/change_text_style"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="end|center_vertical"
+            android:textAlignment="gravity"
+            android:padding="10dp"
+            android:layout_marginTop="-5.5dp"
+            android:layout_marginRight="5.5dp"
+            android:text="@string/add_text_btn"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="#FFFFFF"
+            android:textSize="21sp" />
     </LinearLayout>
 
     <com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker
@@ -47,8 +61,8 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="20dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
         app:borderColor="@android:color/transparent"
         app:borderWidth="8dp" />
 

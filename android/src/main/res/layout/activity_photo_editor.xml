@@ -39,7 +39,7 @@
                     android:contentDescription="@string/app_name"
                     android:scaleType="centerCrop" />
 
-                <com.ahmedadeltito.photoeditorsdk.BrushDrawingView
+                <com.ahmedadeltito.photoeditor.photoeditorsdk.BrushDrawingView
                     android:id="@+id/drawing_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -143,10 +143,11 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:padding="15dp"
-                    android:text="@string/ic_text"
+                    android:fontFamily="@font/roboto_medium"
+                    android:padding="10dp"
+                    android:text="@string/add_text_btn"
                     android:textColor="#FFFFFF"
-                    android:textSize="20sp" />
+                    android:textSize="21sp" />
 
                 <TextView
                     android:id="@+id/add_pencil_tv"
@@ -325,8 +326,8 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
                 android:visibility="invisible"
                 app:borderColor="@android:color/transparent"
                 app:borderWidth="8dp"

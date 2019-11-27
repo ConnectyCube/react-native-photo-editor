@@ -31,4 +31,6 @@
     <string name="erase">Erase</string>
     <string name="apply_changes_and_ctart_crop">Are you sure you want to save all changes and continue to crop/rotate picture?</string>
 
+    <string name="add_text_btn">T</string>
+
 </resources>
