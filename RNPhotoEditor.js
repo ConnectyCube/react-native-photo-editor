@@ -29,7 +29,9 @@ export default function PhotoEditor(props) {
         onDone = () => {},
         path = null,
         focusOnText = false,
-        stickers = []
+        stickers = [],
+        width = 0,
+        height = 0
     } = props
     RNPhotoEditor.Edit(
         {
@@ -42,7 +44,9 @@ export default function PhotoEditor(props) {
             colorPrimary,
             onDone,
             path,
-            stickers
+            stickers,
+            width,
+            height
         },
         onDone,
         onCancel
