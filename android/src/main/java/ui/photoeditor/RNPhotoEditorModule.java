@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ahmedadeltito.photoeditor.PhotoEditorActivity;
@@ -73,11 +74,14 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
             mDoneCallback.invoke(result);
 
             String path = resultIntentBundle.getString("imagePath");
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(new File(path).getAbsolutePath(), options);
 
-            Log.d("RNPhotoEditorModule", "result image size : width = " + options.outWidth + " height = " + options.outHeight);
+            if (!TextUtils.isEmpty(path)) {
+              BitmapFactory.Options options = new BitmapFactory.Options();
+              options.inJustDecodeBounds = true;
+              BitmapFactory.decodeFile(new File(path).getAbsolutePath(), options);
+
+              Log.d("RNPhotoEditorModule", "result image size : width = " + options.outWidth + " height = " + options.outHeight);
+            }
           }
         }
 
@@ -107,6 +111,8 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
     String defaultBackgroundColor = props.getString("defaultBackgroundColor");
     String targetImageDirectoryName = props.getString("editedImageDirectory");
     String colorPrimary = props.getString("colorPrimary");
+    int height = props.getInt("height");
+    int width = props.getInt("width");
 
     //Process Stickers
     ReadableArray stickers = props.getArray("stickers");
@@ -134,7 +140,6 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
       colorPickerColors.add(Color.parseColor(colors.getString(i)));
     }
 
-
     Intent intent = new Intent(getCurrentActivity(), PhotoEditorActivity.class);
     intent.putExtra("selectedImagePath", path);
     intent.putExtra("editedImageDirectory", targetImageDirectoryName);
@@ -144,6 +149,8 @@ public class RNPhotoEditorModule extends ReactContextBaseJavaModule {
     intent.putExtra("hiddenControls", hiddenControlsIntent);
     intent.putExtra("stickers", stickersIntent);
     intent.putExtra("focusOnText", props.getBoolean("focusOnText"));
+    intent.putExtra("width", width);
+    intent.putExtra("height", height);
 
     PHOTO_EDITOR_REQUEST = rand.nextInt(MAX_REQUEST_CODE_VAL);
 
