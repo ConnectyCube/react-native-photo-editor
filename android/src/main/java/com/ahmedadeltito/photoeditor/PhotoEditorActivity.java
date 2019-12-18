@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -34,6 +35,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +57,11 @@ import com.ahmedadeltito.photoeditor.photoeditorsdk.BrushDrawingView;
 import com.ahmedadeltito.photoeditor.photoeditorsdk.OnPhotoEditorSDKListener;
 import com.ahmedadeltito.photoeditor.photoeditorsdk.PhotoEditorSDK;
 import com.ahmedadeltito.photoeditor.photoeditorsdk.ViewType;
+import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.viewpagerindicator.PageIndicator;
 import com.yalantis.ucrop.UCrop;
@@ -104,6 +111,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private ImageView backgroundImageView,  eraseDrawingImageView, brushDrawingImageView;
     private int currentBgColorIndex = 0;
     private FloatingActionButton doneDrawingFloatingAB;
+    private ProgressBar progressBar;
     private Bitmap backgroundBitMap;
     private int currentBackgroundColor = 0;
     private int colorPrimary = Color.parseColor("#017525");
@@ -124,6 +132,9 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private VideoView videoView;
     private int currentVideoPosition;
     private Uri currentVideoUri;
+    private String videoPath;
+    private int videoWidth;
+    private int videoHeight;
 
 
     @Override
@@ -184,10 +195,10 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             if (selectedImagePath.endsWith(".mp4") || selectedImagePath.endsWith(".3gp")){
                 isVideo = true;
                 currentVideoUri = Uri.fromFile(new File(selectedImagePath));
+                videoPath = selectedImagePath;
 
-                int height = getIntent().getExtras().getInt("height");
-                int width = getIntent().getExtras().getInt("width");
-                backgroundBitMap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                calculateVideoResolution(selectedImagePath);
+                backgroundBitMap = Bitmap.createBitmap(videoWidth, videoHeight, Bitmap.Config.ARGB_8888);
                 currentBackgroundColor = Color.TRANSPARENT;
                 Log.d(TAG, "bg color = " + currentBackgroundColor);
                 imageOrientation = ExifInterface.ORIENTATION_NORMAL;
@@ -249,6 +260,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
             initVideoView();
         }
+
+        progressBar = findViewById(R.id.progress_bar);
 
         messageTextInput.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -365,6 +378,23 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    private void calculateVideoResolution(String videoPath) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(videoPath);
+        videoWidth = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+        videoHeight = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+        Log.d(TAG,"calculateVideoResolution: videoWidth = " + videoWidth + ", videoHeight = " + videoHeight);
+
+        int rotation = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+        if (rotation == 90 || rotation == 270) {
+            int tempWidth = videoWidth;
+            videoWidth = videoHeight;
+            videoHeight = tempWidth;
+        }
+        Log.d(TAG,"calculateVideoResolution: videoWidth = " + videoWidth + ", videoHeight = " + videoHeight);
+        retriever.release();
+    }
+
     private void initializePlayer() {
         if (!isVideo) return;
 
@@ -435,6 +465,20 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     protected void onStop() {
         super.onStop();
         releasePlayer();
+    }
+
+    private void showProgress(){
+        progressBar.setVisibility(View.VISIBLE);
+
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        );
+    }
+
+    private void hideProgress(){
+        progressBar.setVisibility(View.GONE);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
     private void loadFonts() {
@@ -665,22 +709,25 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 }
 
                 public void onFinish() {
-                    Intent returnIntent = new Intent();
+                    final Intent returnIntent = new Intent();
 
                     boolean hasChanges = clearAllTextView.getVisibility() == View.VISIBLE
                             || clearAllTextTextView.getVisibility() == View.VISIBLE;
 
                     if (isSDCARDMounted()) {
-                        String selectedOutputPath = getEditedFilePath();
+                        final String selectedOutputPath = getEditedFilePath();
                         String imageMessageText = messageTextInput.getText().toString();
                         returnIntent.putExtra("messageText", imageMessageText);
                         returnIntent.putExtra("hasChanges", hasChanges);
 
-                        if (!hasChanges && isVideo) {
-                            setResult(Activity.RESULT_OK, returnIntent);
-                            finish();
-                            return;
-                        }
+//                        if (!hasChanges && isVideo) {
+//                            setResult(Activity.RESULT_OK, returnIntent);
+//
+//
+//
+//                            finish();
+//                            return;
+//                        }
 
                         returnIntent.putExtra("imagePath", selectedOutputPath);
 
@@ -709,13 +756,93 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
+                            if (isVideo) {
+                                final FFmpeg ffmpeg = FFmpeg.getInstance(PhotoEditorActivity.this);
+                                try {
+                                    ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+
+                                        @Override
+                                        public void onStart() { showProgress(); }
+
+                                        @Override
+                                        public void onFailure() { hideProgress(); }
+
+                                        @Override
+                                        public void onSuccess() {}
+
+                                        @Override
+                                        public void onFinish() {
+                                            hideProgress();
+
+                                            try {
+                                                String[] cmd = new String[]{
+                                                        "-i", videoPath,
+                                                        "-i", selectedOutputPath,
+                                                        "-filter_complex", "[0:v]crop=iw:ih [v1]; [1:v][v1]scale2ref[wm][v1];[v1][wm]overlay=0:0", //scale image to video size
+                                                        "-b:v", "8M", // bitrate video
+                                                        "-b:a", "128k", // bitrate audio
+                                                        selectedOutputPath.replace(".png", ".mp4")
+                                                };
+                                                ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
+                                                    @Override
+                                                    public void onSuccess(String message) {
+//                                                        Toast.makeText(PhotoEditorActivity.this, "SUCCESS: " + message, Toast.LENGTH_SHORT).show();
+                                                        Log.v(TAG, "SUCCESS: " + message);
+                                                    }
+
+                                                    @Override
+                                                    public void onProgress(String message) {
+//                                                        Toast.makeText(PhotoEditorActivity.this, "PROGRESS: " + message, Toast.LENGTH_SHORT).show();
+                                                        Log.v(TAG, "PROGRESS: " + message);
+
+
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(String message) {
+                                                        hideProgress();
+                                                        Toast.makeText(PhotoEditorActivity.this, "FAILURE: " + message, Toast.LENGTH_SHORT).show();
+                                                        Log.v(TAG, "FAILURE: " + message);
+                                                    }
+
+                                                    @Override
+                                                    public void onStart() {
+                                                        showProgress();
+                                                        Toast.makeText(PhotoEditorActivity.this, "START", Toast.LENGTH_SHORT).show();
+                                                        Log.v(TAG, "START");
+                                                    }
+
+                                                    @Override
+                                                    public void onFinish() {
+                                                        hideProgress();
+                                                        Toast.makeText(PhotoEditorActivity.this, "FINISH", Toast.LENGTH_SHORT).show();
+                                                        Log.v(TAG, "FINISH");
+                                                        setResult(Activity.RESULT_OK, returnIntent);
+                                                        finish();
+                                                    }
+                                                });
+                                            } catch (FFmpegCommandAlreadyRunningException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                        }
+                                    });
+                                } catch (FFmpegNotSupportedException e) {
+                                    // Handle if FFmpeg is not supported by device
+                                }
+
+
+                            }
                         } catch (Exception var7) {
                             var7.printStackTrace();
                         }
                     }
 
-                    setResult(Activity.RESULT_OK, returnIntent);
-                    finish();
+                    if (!isVideo) {
+                        setResult(Activity.RESULT_OK, returnIntent);
+                        finish();
+                    }
                 }
             }.start();
             // Toast.makeText(this, getString(R.string.save_image_succeed), Toast.LENGTH_SHORT).show();
