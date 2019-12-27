@@ -3,7 +3,6 @@ package com.ahmedadeltito.photoeditor;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.MediaRouteButton;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,12 +15,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -29,17 +29,17 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,12 +52,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.ahmedadeltito.photoeditor.widget.SlidingUpPanelLayout;
-import com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker;
 import com.ahmedadeltito.photoeditor.photoeditorsdk.BrushDrawingView;
 import com.ahmedadeltito.photoeditor.photoeditorsdk.OnPhotoEditorSDKListener;
 import com.ahmedadeltito.photoeditor.photoeditorsdk.PhotoEditorSDK;
 import com.ahmedadeltito.photoeditor.photoeditorsdk.ViewType;
+import com.ahmedadeltito.photoeditor.widget.VerticalSlideColorPicker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.viewpagerindicator.PageIndicator;
 import com.yalantis.ucrop.UCrop;
@@ -95,7 +94,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private RelativeLayout parentImageRelativeLayout;
     private VerticalSlideColorPicker mainColorPicker;
     private TextView undoTextView, undoTextTextView, changeBackgroundTextView, clearAllTextView, clearAllTextTextView, messageTextInput;
-    private SlidingUpPanelLayout mLayout;
+    private RelativeLayout imageEmojiBottomSheet;
     private View topShadow;
     private RelativeLayout topShadowRelativeLayout;
     private View undoLayout;
@@ -107,12 +106,15 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private ImageView backgroundImageView,  eraseDrawingImageView, brushDrawingImageView;
     private int currentBgColorIndex = 0;
     private FloatingActionButton doneDrawingFloatingAB;
+    private ProgressBar progressBar;
     private Bitmap backgroundBitMap;
     private int currentBackgroundColor = 0;
     private int colorPrimary = Color.parseColor("#017525");
     private String defaultBackgroundColor = null;
     private boolean brushWasAdded = false;
     private boolean focusOnText = false;
+    private String selectedMediaPath;
+    private boolean wasCropped;
 
     // CROP OPTION
     private boolean cropperCircleOverlay = false;
@@ -120,6 +122,15 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     private boolean showCropGuidelines = true;
     private boolean hideBottomControls = false;
     private boolean hideTextInput = false;
+
+    // VIDEO PREFERENCES
+    private boolean isVideo;
+    private ImageView playVideoBtn;
+    private VideoView videoView;
+    private int currentVideoPosition;
+    private Uri currentVideoUri;
+    private int videoWidth;
+    private int videoHeight;
 
 
     @Override
@@ -129,13 +140,13 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         loadFonts();
         initPrimaryColor();
 
-        String selectedImagePath = getIntent().getExtras().getString("selectedImagePath");
+        selectedMediaPath = getIntent().getExtras().getString("selectedImagePath");
         focusOnText = getIntent().getExtras().getBoolean("focusOnText", false);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
 
-        if (TextUtils.isEmpty(selectedImagePath)) {
+        if (TextUtils.isEmpty(selectedMediaPath)) {
 
             ArrayList<Integer> intentColors = (ArrayList<Integer>) getIntent().getExtras().getSerializable("colorPickerColors");
 
@@ -173,22 +184,34 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             imageOrientation = ExifInterface.ORIENTATION_NORMAL;
             backgroundBitMap.eraseColor(currentBackgroundColor);
         } else {
-            if (selectedImagePath.contains("content://")) {
-                selectedImagePath = getPath(Uri.parse(selectedImagePath));
+            if (selectedMediaPath.contains("content://")) {
+                selectedMediaPath = getPath(Uri.parse(selectedMediaPath));
             }
 
-            backgroundBitMap = BitmapFactory.decodeFile(selectedImagePath, options);
+            if (selectedMediaPath.endsWith(".mp4") || selectedMediaPath.endsWith(".3gp")){
+                isVideo = true;
+                currentVideoUri = Uri.fromFile(new File(selectedMediaPath));
 
-            try {
-                ExifInterface exif = new ExifInterface(selectedImagePath);
-                imageOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                backgroundBitMap = rotateBitmap(backgroundBitMap, imageOrientation, false);
-            } catch (IOException e) {
+                calculateVideoResolution(selectedMediaPath);
+                backgroundBitMap = Bitmap.createBitmap(videoWidth, videoHeight, Bitmap.Config.ARGB_8888);
+                currentBackgroundColor = Color.TRANSPARENT;
+                Log.d(TAG, "bg color = " + currentBackgroundColor);
                 imageOrientation = ExifInterface.ORIENTATION_NORMAL;
-                e.printStackTrace();
-            }
+                backgroundBitMap.eraseColor(currentBackgroundColor);
+            } else {
+                backgroundBitMap = BitmapFactory.decodeFile(selectedMediaPath, options);
 
-            Log.w(TAG, "Income to Editor image size: width = " + options.outWidth + " height = " + options.outHeight);
+                try {
+                    ExifInterface exif = new ExifInterface(selectedMediaPath);
+                    imageOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                    backgroundBitMap = rotateBitmap(backgroundBitMap, imageOrientation, false);
+                } catch (IOException e) {
+                    imageOrientation = ExifInterface.ORIENTATION_NORMAL;
+                    e.printStackTrace();
+                }
+
+                Log.w(TAG, "Income to Editor image size: width = " + options.outWidth + " height = " + options.outHeight);
+            }
         }
 
         Typeface newFont = getFontFromRes(R.raw.eventtusicons);
@@ -218,11 +241,23 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         messageTextInput = findViewById(R.id.messageText);
         FloatingActionButton goToNextFAB = findViewById(R.id.go_to_next_screen_btn);
         backgroundImageView = findViewById(R.id.photo_edit_iv);
-        mLayout = findViewById(R.id.sliding_layout);
+        imageEmojiBottomSheet = findViewById(R.id.image_emoji_bottom_sheet);
         topShadow = findViewById(R.id.top_shadow);
         topShadowRelativeLayout = findViewById(R.id.top_parent_rl);
         undoLayout = findViewById(R.id.undo_layout);
         bottomShadowRelativeLayout = findViewById(R.id.bottom_parent_rl);
+
+        if (isVideo) {
+            addCropTextView.setVisibility(View.GONE);
+            videoView = findViewById(R.id.video_view);
+
+            playVideoBtn = findViewById(R.id.play_video_btn);
+            playVideoBtn.setOnClickListener(this);
+
+            initVideoView();
+        }
+
+        progressBar = findViewById(R.id.progress_bar);
 
         messageTextInput.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -280,27 +315,6 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         photoEditorSDK.setOnPhotoEditorSDKListener(this);
         photoEditorSDK.setBrushEraserSize(50f);
 
-        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                if (position == 0)
-                    mLayout.setScrollableView(((ImageFragment) fragmentsList.get(position)).imageRecyclerView);
-                else if (position == 1)
-                    mLayout.setScrollableView(((EmojiFragment) fragmentsList.get(position)).emojiRecyclerView);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-
         closeTextView.setOnClickListener(this);
         addImageEmojiTextView.setOnClickListener(this);
         addCropTextView.setOnClickListener(this);
@@ -317,17 +331,6 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         clearAllTextView.setOnClickListener(this);
         clearAllTextTextView.setOnClickListener(this);
         goToNextFAB.setOnClickListener(this);
-
-        new CountDownTimer(500, 100) {
-
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-                mLayout.setScrollableView(((ImageFragment) fragmentsList.get(0)).imageRecyclerView);
-            }
-
-        }.start();
 
         ArrayList hiddenControls = (ArrayList<Integer>) getIntent().getExtras().getSerializable("hiddenControls");
         for (int i = 0; i < hiddenControls.size(); i++) {
@@ -371,6 +374,109 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    private void calculateVideoResolution(String videoPath) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(videoPath);
+        videoWidth = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+        videoHeight = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+        Log.d(TAG,"calculateVideoResolution: videoWidth = " + videoWidth + ", videoHeight = " + videoHeight);
+
+        int rotation = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+        if (rotation == 90 || rotation == 270) {
+            int tempWidth = videoWidth;
+            videoWidth = videoHeight;
+            videoHeight = tempWidth;
+        }
+        Log.d(TAG,"calculateVideoResolution: videoWidth = " + videoWidth + ", videoHeight = " + videoHeight);
+        retriever.release();
+    }
+
+    private void initializePlayer() {
+        if (!isVideo) return;
+
+        playVideoBtn.setVisibility(View.VISIBLE);
+
+        videoView.setVideoURI(currentVideoUri);
+        videoView.seekTo(currentVideoPosition > 0 ? currentVideoPosition : 1);
+        Log.d(TAG, "current currentVideoPosition: " + currentVideoPosition);
+    }
+
+    private void releasePlayer() {
+        if (!isVideo) return;
+
+        videoView.stopPlayback();
+    }
+
+    private void initVideoView() {
+        videoView.setVisibility(View.VISIBLE);
+        playVideoBtn.setVisibility(View.VISIBLE);
+
+        videoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (videoView.isPlaying()){
+                    stopVideo();
+                } else {
+                    playVideo();
+                }
+            }
+        });
+
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                playVideoBtn.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    private void playVideo() {
+        if (videoView.isPlaying()) return;
+
+        playVideoBtn.setVisibility(View.GONE);
+        videoView.requestFocus();
+        videoView.start();
+    }
+
+    private void stopVideo(){
+        videoView.pause();
+        playVideoBtn.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        initializePlayer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isVideo) {
+            currentVideoPosition = videoView.getCurrentPosition();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        releasePlayer();
+    }
+
+    private void showProgress(){
+        progressBar.setVisibility(View.VISIBLE);
+
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        );
+    }
+
+    private void hideProgress(){
+        progressBar.setVisibility(View.GONE);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
     private void loadFonts() {
         typeFaces = new ArrayList<>(Arrays.asList(
                 ResourcesCompat.getFont(this, R.font.roboto_medium),
@@ -405,14 +511,12 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
     public void addEmoji(String emojiName) {
         photoEditorSDK.addEmoji(emojiName, emojiFont);
-        if (mLayout != null)
-            mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        imageEmojiBottomSheet.setVisibility(View.GONE);
     }
 
     public void addImage(Bitmap image) {
         photoEditorSDK.addImage(image);
-        if (mLayout != null)
-            mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        imageEmojiBottomSheet.setVisibility(View.GONE);
     }
 
     private void addText(String text, int colorCodeTextView, Typeface textTypeFace) {
@@ -601,13 +705,26 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                 }
 
                 public void onFinish() {
-                    Intent returnIntent = new Intent();
+                    final Intent returnIntent = new Intent();
+
+                    boolean hasChanges = clearAllTextView.getVisibility() == View.VISIBLE
+                            || clearAllTextTextView.getVisibility() == View.VISIBLE || wasCropped;
 
                     if (isSDCARDMounted()) {
-                        String selectedOutputPath = getEditedFilePath();
+                        final String selectedOutputPath = getEditedFilePath();
                         String imageMessageText = messageTextInput.getText().toString();
                         returnIntent.putExtra("messageText", imageMessageText);
-                        returnIntent.putExtra("imagePath", selectedOutputPath);
+                        returnIntent.putExtra("hasChanges", hasChanges);
+
+                        if (!hasChanges) {
+                            returnIntent.putExtra("imagePath", selectedMediaPath);
+
+                            setResult(Activity.RESULT_OK, returnIntent);
+                            finish();
+                            return;
+                        } else {
+                            showProgress();
+                        }
 
                         File file = new File(selectedOutputPath);
 
@@ -617,8 +734,11 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                                 parentImageRelativeLayout.setDrawingCacheEnabled(true);
 
                                 Bitmap bitmap = parentImageRelativeLayout.getDrawingCache();
+                                if (isVideo) {
+                                    bitmap.setHasAlpha(true);
+                                }
                                 Bitmap rotatedBitmap = rotateBitmap(bitmap, imageOrientation, true);
-                                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+                                rotatedBitmap.compress(isVideo ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, 80, out);
                             }
 
                             out.flush();
@@ -631,13 +751,43 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
+                            if (isVideo) {
+                                VideoEncoderUtils.combineVideoWithImage(
+                                        PhotoEditorActivity.this,
+                                        getIntent().getExtras().getString("editedImageDirectory"),
+                                        selectedMediaPath,
+                                        selectedOutputPath,
+                                        new VideoEncoderUtils.VideoEncoderCallback() {
+                                            @Override
+                                            public void onSuccess(String resultVideoPath) {
+                                                hideProgress();
+                                                removeVideoChangesFile(selectedOutputPath);
+                                                returnIntent.putExtra("imagePath", resultVideoPath);
+                                                setResult(Activity.RESULT_OK, returnIntent);
+                                                finish();
+                                            }
+
+                                            @Override
+                                            public void onError(String errorMessage) {
+                                                hideProgress();
+                                                returnIntent.putExtra("imagePath", selectedMediaPath);
+                                                setResult(Activity.RESULT_OK, returnIntent);
+                                                finish();
+                                            }
+                                        });
+                            } else {
+                                returnIntent.putExtra("imagePath", selectedOutputPath);
+                            }
                         } catch (Exception var7) {
                             var7.printStackTrace();
                         }
                     }
 
-                    setResult(Activity.RESULT_OK, returnIntent);
-                    finish();
+                    if (!isVideo) {
+                        setResult(Activity.RESULT_OK, returnIntent);
+                        finish();
+                    }
                 }
             }.start();
             // Toast.makeText(this, getString(R.string.save_image_succeed), Toast.LENGTH_SHORT).show();
@@ -646,6 +796,17 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    private void removeVideoChangesFile(final String tempImgPath) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File file = new File(tempImgPath);
+                if (file.exists()){
+                    file.delete();
+                }
+            }
+        }).start();
+    }
 
     private void returnBackWithUpdateImage() {
         updateView(View.GONE);
@@ -745,6 +906,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
     public void onBackPressed() {
         if (mainColorPicker.getVisibility() == View.VISIBLE) {
             updateBrushDrawingView(false);
+        } else if (imageEmojiBottomSheet.getVisibility() == View.VISIBLE) {
+            imageEmojiBottomSheet.setVisibility(View.GONE);
         } else {
             super.onBackPressed();
         }
@@ -755,7 +918,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
         if (v.getId() == R.id.close_tv) {
             onBackPressed();
         } else if (v.getId() == R.id.add_image_emoji_tv) {
-            mLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            imageEmojiBottomSheet.setVisibility(View.VISIBLE);
         } else if(v.getId() == R.id.add_crop_tv) {
             startCropping(clearAllTextView.getVisibility() == View.VISIBLE || clearAllTextTextView.getVisibility() == View.VISIBLE);
         } else if (v.getId() == R.id.add_text_tv) {
@@ -780,6 +943,8 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
             returnBackWithSavedImage();
         } else if (v.getId() == R.id.change_background_btn) {
             onChangeBackgroundColor();
+        } else if (v.getId() == R.id.play_video_btn) {
+            playVideo();
         }
     }
 
@@ -1012,6 +1177,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
                         backgroundBitMap = MediaStore.Images.Media.getBitmap(this.getContentResolver() , resultUri);
                         backgroundImageView.setImageBitmap(backgroundBitMap);
                         changeBackgroundTextView.setVisibility(View.INVISIBLE);
+                        wasCropped = true;
                     } catch (Exception ex) {
                         System.out.println("NO IMAGE DATA FOUND");
                     }
@@ -1084,7 +1250,7 @@ public class PhotoEditorActivity extends AppCompatActivity implements View.OnCli
 
     private String getEditedFilePath(){
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageName = "IMG_" + timeStamp + ".jpg";
+        String imageName = "IMG_" + timeStamp + (isVideo ? ".png" : ".jpg");
 
         String folderName = getIntent().getExtras().getString("editedImageDirectory");
         if (TextUtils.isEmpty(folderName)) {

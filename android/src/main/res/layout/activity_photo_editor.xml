@@ -8,22 +8,28 @@
     android:fitsSystemWindows="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:animateLayoutChanges="true"
     tools:context="com.ahmedadeltito.photoeditor.PhotoEditorActivity">
 
-    <com.ahmedadeltito.photoeditor.widget.SlidingUpPanelLayout
+    <RelativeLayout
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom"
-        app:umanoDragView="@+id/dragView"
-        app:umanoOverlay="true"
-        app:umanoShadowHeight="4dp">
+        android:gravity="bottom" >
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#000000"
             android:gravity="center">
+
+            <VideoView
+                android:id="@+id/video_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <RelativeLayout
                 android:id="@+id/parent_image_rl"
@@ -346,18 +352,38 @@
                 android:src="@drawable/ic_check"
                 android:visibility="gone"
                 tools:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/play_video_btn"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/btn_play"
+                android:visibility="gone"
+                tools:ignore="ContentDescription"
+                tools:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/image_emoji_bottom_sheet"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="gone">
 
             <com.ahmedadeltito.photoeditor.widget.RealtimeBlurView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:realtimeBlurRadius="10dp"
-                app:realtimeOverlayColor="#33ffffff" />
+                app:realtimeOverlayColor="#a0000000" />
 
             <androidx.viewpager.widget.ViewPager
                 android:id="@+id/image_emoji_view_pager"
@@ -377,6 +403,6 @@
 
         </RelativeLayout>
 
-    </com.ahmedadeltito.photoeditor.widget.SlidingUpPanelLayout>
+    </RelativeLayout>
 
 </RelativeLayout>
